@@ -1,6 +1,7 @@
 import HeaderBasket from "../../eCommerce/HeaderBasket/HeaderBasket";
 import { Badge, Container, Nav, Navbar } from "react-bootstrap";
 import styles from "./styles.module.css";
+import { NavLink } from "react-router-dom";
 const { headerContainer, headerLogo } = styles;
 const Header = () => {
   return (
@@ -11,22 +12,37 @@ const Header = () => {
         </h1>
         <HeaderBasket />
       </div>
-        <Navbar expand="lg" className="bg-body-tertiary" bg="dark" data-bs-theme="dark">
-          <Container>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-              <Nav className="me-auto">
-                <Nav.Link href="#home">Home</Nav.Link>
-                <Nav.Link href="#link">Categories</Nav.Link>
-                <Nav.Link href="#link">About</Nav.Link>
-              </Nav>
-              <Nav>
-                <Nav.Link href="#home">Login</Nav.Link>
-                <Nav.Link href="#link">Register</Nav.Link>
-              </Nav>
-            </Navbar.Collapse>
-          </Container>
-        </Navbar>
+      <Navbar
+        expand="lg"
+        className="bg-body-tertiary"
+        bg="dark"
+        data-bs-theme="dark"
+      >
+        <Container>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="me-auto">
+              <Nav.Link as={NavLink} to="/">
+                Home
+              </Nav.Link>
+              <Nav.Link as={NavLink} to="categories">
+                Categories
+              </Nav.Link>
+              <Nav.Link as={NavLink} to="about">
+                About
+              </Nav.Link>
+            </Nav>
+            <Nav>
+              <Nav.Link as={NavLink} to="login">
+                Login
+              </Nav.Link>
+              <Nav.Link as={NavLink} to="register">
+                Register
+              </Nav.Link>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
     </header>
   );
 };
