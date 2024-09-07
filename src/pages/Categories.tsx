@@ -1,10 +1,10 @@
-import { Container } from "react-bootstrap";
-import Category from "../components/eCommerce/Category/Category";
-import { useEffect } from "react";
-import actGetCategories from "../store/categories/act/actGetCategories";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import Loading from "../components/feedback/loading/Loading";
-import GridList from "../components/common/GridList/GridList";
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import Category from '../components/eCommerce/Category/Category';
+import actGetCategories from '../store/categories/act/actGetCategories';
+import Loading from '../components/feedback/loading/Loading';
+import GridList from '../components/common/GridList/GridList';
+import Heading from '../components/common/Heading/Heading';
 const Categories = () => {
   const dispatch = useAppDispatch();
   const { record, loading, error } = useAppSelector((state) => state.category);
@@ -14,17 +14,13 @@ const Categories = () => {
     }
   }, [dispatch, record]);
 
-  
   return (
-    <Container>
+    <>
+      <Heading>Categories</Heading>
       <Loading loading={loading} error={error}>
-        <GridList
-          record={record}
-          renderItem={(record) => <Category {...record} />}
-        />
-        
+        <GridList record={record} renderItem={(record) => <Category {...record} />} />
       </Loading>
-    </Container>
+    </>
   );
 };
 

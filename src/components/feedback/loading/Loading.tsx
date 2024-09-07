@@ -1,5 +1,7 @@
+import { TLoading } from "../../../types";
+
 interface IProps {
-  loading: "idle" | "pending" | "succeeded" | "failed";
+  loading: TLoading;
   error: string | null;
   children: React.ReactNode;
 }
