@@ -16,6 +16,8 @@ export type TCategory = {
 export type TLoading = 'idle' | 'pending' | 'succeeded' | 'failed';
 
 export interface ICartState {
-  items: { [key: number]: number };
-  productFullInfo: TProduct[];
+  items: { [key: string]: number };
+  productsFullInfo: TProduct[];
+  loading: TLoading;
+  error: null | string;
 }

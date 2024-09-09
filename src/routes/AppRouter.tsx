@@ -7,6 +7,7 @@ import About from "../pages/About";
 import Register from "../pages/Register";
 import Login from "../pages/Login";
 import Error from "../pages/Error";
+import Cart from "../pages/Cart";
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: "cart",
+        element: <Cart />,
       },
       {
         path: "categories",
