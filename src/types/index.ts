@@ -6,6 +6,7 @@ export type TProduct = {
   img: string;
   quantity?: number;
   max: number;
+  isLikeIt?: boolean;
 };
 export type TCategory = {
   id?: number;
@@ -20,4 +21,10 @@ export interface ICartState {
   productsFullInfo: TProduct[];
   loading: TLoading;
   error: null | string;
+}
+export interface IWishlist {
+  itemsId: number[];
+  productsFullInfo: TProduct[];
+  error: null | string;
+  loading: TLoading;
 }

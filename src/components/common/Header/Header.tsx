@@ -1,8 +1,9 @@
-import HeaderBasket from "../../eCommerce/HeaderBasket/HeaderBasket";
-import { Badge, Container, Nav, Navbar } from "react-bootstrap";
-import styles from "./styles.module.css";
-import { NavLink } from "react-router-dom";
-const { headerContainer, headerLogo } = styles;
+import { Badge, Container, Nav, Navbar } from 'react-bootstrap';
+import { NavLink } from 'react-router-dom';
+import HeaderBasket from '../../eCommerce/HeaderBasket/HeaderBasket';
+import styles from './styles.module.css';
+import HeaderWishlist from '../../eCommerce/HeaderWishlist/HeaderWishlist';
+const { headerContainer, headerLogo,headerIcons } = styles;
 const Header = () => {
   return (
     <header>
@@ -10,14 +11,12 @@ const Header = () => {
         <h1 className={headerLogo}>
           <span>Our</span> <Badge bg="info">Ecom</Badge>
         </h1>
-        <HeaderBasket />
+        <div className={headerIcons}>
+          <HeaderWishlist />
+          <HeaderBasket />
+        </div>
       </div>
-      <Navbar
-        expand="lg"
-        className="bg-body-tertiary"
-        bg="dark"
-        data-bs-theme="dark"
-      >
+      <Navbar expand="lg" className="bg-body-tertiary" bg="dark" data-bs-theme="dark">
         <Container>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">

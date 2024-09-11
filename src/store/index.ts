@@ -4,17 +4,24 @@ import storage from 'redux-persist/lib/storage';
 import category from './categories/categorySlice';
 import product from './products/productSlice';
 import cart from './cart/cartSlice';
+import wishlist from './wishlist/wishlistSlice';
 
 const cartPersistConfig = {
   key: 'cart',
   storage,
   whitelist: ['items'],
 };
+const wishlistPersistConfig = {
+  key: 'wishlist',
+  storage,
+  whitelist: ['itemsId'],
+};
 
 const rootReducer = combineReducers({
   category,
   product,
   cart: persistReducer(cartPersistConfig, cart),
+  wishlist: persistReducer(wishlistPersistConfig, wishlist),
 });
 
 const store = configureStore({
@@ -22,7 +29,7 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoreActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }),
 });

@@ -1,6 +1,11 @@
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { actGetProductsByItems, cartItemChangeQuantity, cartItemRemove } from '../store/cart/cartSlice';
+import {
+  actGetProductsByItems,
+  cartItemChangeQuantity,
+  cartItemRemove,
+  productFullInfoCleanUp,
+} from '../store/cart/cartSlice';
 import CartSubtotalPrice from '../components/eCommerce/CartSubtotalPrice/CartSubtotalPrice';
 import Heading from '../components/common/Heading/Heading';
 import Loading from '../components/feedback/loading/Loading';
@@ -10,6 +15,9 @@ const Cart = () => {
   const { items, productsFullInfo, loading, error } = useAppSelector((state) => state.cart);
   useEffect(() => {
     dispatch(actGetProductsByItems());
+    return () => {
+      dispatch(productFullInfoCleanUp());
+    };
   }, [dispatch]);
   const products = productsFullInfo.map((el) => ({ ...el, quantity: items[el.id] || 0 }));
   const changeQuantityHandler = useCallback(
