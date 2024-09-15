@@ -1,11 +1,11 @@
 import { memo, useEffect, useState } from 'react';
-import { useAppDispatch } from '../../../store/hooks';
-import { actLikeToggle } from '../../../store/wishlist/wishlistSlice';
+import { useAppDispatch } from '@store/hooks';
+import { actLikeToggle } from '@store/wishlist/wishlistSlice';
 import { Button, Spinner } from 'react-bootstrap';
-import { addToCart } from '../../../store/cart/cartSlice';
-import { TProduct } from '../../../types';
-import DisLike from '../../../assets/svg/like.svg?react';
-import Like from '../../../assets/svg/like-fill.svg?react';
+import { addToCart } from '@store/cart/cartSlice';
+import { TProduct } from '@types';
+import DisLike from '@assets/svg/like.svg?react';
+import Like from '@assets/svg/like-fill.svg?react';
 import styles from './styles.module.css';
 const { product, productImg, maximumNotice, wishlistBtn } = styles;
 const Product = memo(({ id, title, img, price, max, quantity, isLikeIt }: TProduct) => {

@@ -1,4 +1,4 @@
-import { TLoading } from "../../../types";
+import { TLoading } from "@types";
 
 interface IProps {
   loading: TLoading;

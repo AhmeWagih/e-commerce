@@ -1,6 +1,6 @@
 import { Button, Form } from 'react-bootstrap';
 import styles from './styles.module.css';
-import { TProduct } from '../../../types';
+import { TProduct } from '@types';
 import { memo } from 'react';
 const { cartItem, product, productImg, productInfo, cartItemSelection } = styles;
 type CartItemProps = TProduct & {
@@ -8,8 +8,6 @@ type CartItemProps = TProduct & {
   removeItemHandler: (id: number) => void;
 };
 const CartItem = memo(({ id, title, img, price, max, quantity, changeQuantityHandler, removeItemHandler }: CartItemProps) => {
-  console.log('render');
-
   const renderOptions = Array(max)
     .fill(0)
     .map((_, idx) => {

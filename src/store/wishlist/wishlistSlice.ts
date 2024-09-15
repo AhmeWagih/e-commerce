@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import actLikeToggle from './act/actLikeToggle';
-import { IWishlist } from '../../types';
+import { IWishlist } from '@types';
 import actGetWishlist from './act/actGetWishlist';
 
 const initialState: IWishlist = {

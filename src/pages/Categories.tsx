@@ -1,24 +1,18 @@
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import Category from '../components/eCommerce/Category/Category';
-import actGetCategories from '../store/categories/act/actGetCategories';
-import Loading from '../components/feedback/loading/Loading';
-import GridList from '../components/common/GridList/GridList';
-import Heading from '../components/common/Heading/Heading';
+import Category from '@components/eCommerce/Category/Category';
+import Loading from '@components/feedback/loading/Loading';
+import GridList from '@components/common/GridList/GridList';
+import Heading from '@components/common/Heading/Heading';
+import useCategories from '@hooks/useCategories';
 const Categories = () => {
-  const dispatch = useAppDispatch();
-  const { record, loading, error } = useAppSelector((state) => state.category);
-  useEffect(() => {
-    if (!record.length) {
-      dispatch(actGetCategories());
-    }
-  }, [dispatch, record]);
-
+  const { loading, error, record } = useCategories();
   return (
     <>
-      <Heading>Categories</Heading>
+      <Heading title="Categories" />
       <Loading loading={loading} error={error}>
-        <GridList record={record} renderItem={(record) => <Category {...record} />} />
+        <GridList
+          record={record}
+          renderItem={(record) => <Category {...record} />}
+        />
       </Loading>
     </>
   );

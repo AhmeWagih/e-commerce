@@ -1,47 +1,61 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout/MainLayout";
-import Home from "../pages/Home";
-import Categories from "../pages/Categories";
-import Products from "../pages/Products";
-import About from "../pages/About";
-import Register from "../pages/Register";
-import Login from "../pages/Login";
-import Error from "../pages/Error";
-import Cart from "../pages/Cart";
-import Wishlist from "../pages/Wishlist";
+import { lazy, Suspense } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+const MainLayout = lazy(() => import('@layouts/MainLayout/MainLayout'));
+const Home = lazy(() => import('@pages/Home'));
+const Categories = lazy(() => import('@pages/Categories'));
+const Products = lazy(() => import('@pages/Products'));
+const About = lazy(() => import('@pages/About'));
+const Register = lazy(() => import('@pages/Register'));
+const Login = lazy(() => import('@pages/Login'));
+const Error = lazy(() => import('@pages/Error'));
+const Cart = lazy(() => import('@pages/Cart'));
+const Wishlist = lazy(() => import('@pages/Wishlist'));
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <MainLayout />,
+    path: '/',
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>{<MainLayout />}</Suspense>
+    ),
     errorElement: <Error />,
     children: [
       {
         index: true,
-        element: <Home />,
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>{<Home />}</Suspense>
+        ),
       },
       {
-        path: "cart",
-        element: <Cart />,
+        path: 'cart',
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>{<Cart />}</Suspense>
+        ),
       },
       {
-        path: "wishlist",
-        element: <Wishlist />,
+        path: 'wishlist',
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>{<Wishlist />}</Suspense>
+        ),
       },
       {
-        path: "categories",
-        element: <Categories />,
+        path: 'categories',
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>{<Categories />}</Suspense>
+        ),
       },
       {
-        path: "categories/products/:prefix",
-        element: <Products />,
+        path: 'categories/products/:prefix',
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>{<Products />}</Suspense>
+        ),
         loader: ({ params }) => {
           if (
-            typeof params.prefix !== "string" ||
+            typeof params.prefix !== 'string' ||
             !/^[a-z]+$/i.test(params.prefix)
           ) {
-            throw new Response("Bad Request", {
-              statusText: "Category not found",
+            throw new Response('Bad Request', {
+              statusText: 'Category not found',
               status: 400,
             });
           }
@@ -49,16 +63,22 @@ const router = createBrowserRouter([
         },
       },
       {
-        path: "about",
-        element: <About />,
+        path: 'about',
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>{<About />}</Suspense>
+        ),
       },
       {
-        path: "login",
-        element: <Login />,
+        path: 'login',
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>{<Login />}</Suspense>
+        ),
       },
       {
-        path: "register",
-        element: <Register />,
+        path: 'register',
+        element: (
+          <Suspense fallback={<div>Loading...</div>}>{<Register />}</Suspense>
+        ),
       },
     ],
   },

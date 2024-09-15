@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import actGetProductsByItems from './act/actGetProductsByItems';
 import { getCartTotalQuantitySelector, itemQuantityAvailabilityCheckingSelector } from './selectors';
 
-import { ICartState } from '../../types';
+import { ICartState } from '@types';
 
 const initialState: ICartState = {
   items: {},
