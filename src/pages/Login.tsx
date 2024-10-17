@@ -1,23 +1,29 @@
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { LoginSchema, LoginType } from '@validations/LoginSchema';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import useLogin from '@hooks/useLogin';
+import { Navigate } from 'react-router-dom';
+import { Form, Button, Row, Col, Spinner } from 'react-bootstrap';
+import { ToastContainer } from 'react-toastify';
 import Input from '@components/forms/Input';
 import Heading from '@components/common/Heading/Heading';
+import 'react-toastify/dist/ReactToastify.css';
+
 const Login = () => {
+
   const {
+    loading,
+    error,
+    submitForm,
+    formErrors,
+    accessToken,
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<LoginType>({
-    mode: 'onBlur',
-    resolver: zodResolver(LoginSchema),
-  });
-  const submitForm: SubmitHandler<LoginType> = (data) => {
-    console.log(data);
-  };
+  } = useLogin();
+  if (accessToken) {
+    return <Navigate to="/" />;
+  }
+
   return (
     <>
+      <ToastContainer />
       <Heading title="User Login" />
       <Row>
         <Col md={{ span: 6, offset: 3 }}>
@@ -26,18 +32,25 @@ const Login = () => {
               label="Email"
               name="email"
               register={register}
-              error={errors.email?.message}
+              error={formErrors.email?.message}
             />
             <Input
               label="Password"
               name="password"
               type="password"
               register={register}
-              error={errors.password?.message}
+              error={formErrors.password?.message}
             />
             <Button variant="info" type="submit" style={{ color: 'white' }}>
-              Login
+              {loading === 'pending' ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                'Login'
+              )}
             </Button>
+            {error && (
+              <p style={{ color: '#DC3545', marginTop: '10px' }}>{error}</p>
+            )}
           </Form>
         </Col>
       </Row>

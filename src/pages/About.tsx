@@ -1,7 +1,11 @@
+import Heading from '@components/common/Heading/Heading';
+
 const About = () => {
   return (
-    <div>About</div>
-  )
-}
+    <>
+      <Heading title="About" />
+    </>
+  );
+};
 
-export default About
+export default About;

@@ -5,6 +5,7 @@ const Home = lazy(() => import('@pages/Home'));
 const Categories = lazy(() => import('@pages/Categories'));
 const Products = lazy(() => import('@pages/Products'));
 const About = lazy(() => import('@pages/About'));
+const Profile = lazy(() => import('@pages/Profile'));
 const Register = lazy(() => import('@pages/Register'));
 const Login = lazy(() => import('@pages/Login'));
 const Cart = lazy(() => import('@pages/Cart'));
@@ -12,7 +13,7 @@ const Wishlist = lazy(() => import('@pages/Wishlist'));
 import Error from '@pages/Error';
 import SuspenseFallback from '@components/feedback/suspenseFallback/SuspenseFallback';
 import LottieHandler from '@components/feedback/lottieHandler/LottieHandler';
-
+import ProtectedRout from '@components/auth/ProtectedRout';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -39,11 +40,19 @@ const router = createBrowserRouter([
       },
       {
         path: 'cart',
-        element: <SuspenseFallback>{<Cart />}</SuspenseFallback>,
+        element: (
+          <ProtectedRout>
+            <SuspenseFallback>{<Cart />}</SuspenseFallback>
+          </ProtectedRout>
+        ),
       },
       {
         path: 'wishlist',
-        element: <SuspenseFallback>{<Wishlist />}</SuspenseFallback>,
+        element: (
+          <ProtectedRout>
+            <SuspenseFallback>{<Wishlist />}</SuspenseFallback>
+          </ProtectedRout>
+        ),
       },
       {
         path: 'categories',
@@ -76,6 +85,14 @@ const router = createBrowserRouter([
       {
         path: 'register',
         element: <SuspenseFallback>{<Register />}</SuspenseFallback>,
+      },
+      {
+        path: 'profile',
+        element: (
+          <ProtectedRout>
+            <SuspenseFallback>{<Profile />}</SuspenseFallback>
+          </ProtectedRout>
+        ),
       },
     ],
   },

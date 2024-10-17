@@ -1,8 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 import actGetProductsByItems from './act/actGetProductsByItems';
-import { getCartTotalQuantitySelector, itemQuantityAvailabilityCheckingSelector } from './selectors';
+import {
+  getCartTotalQuantitySelector,
+  itemQuantityAvailabilityCheckingSelector,
+} from './selectors';
 
 import { ICartState } from '@types';
+import { toast } from 'react-toastify';
+// import { authLogout } from '@store/auth/authSlice';
 
 const initialState: ICartState = {
   items: {},
@@ -18,8 +23,9 @@ const cartSlice = createSlice({
     addToCart: (state, action) => {
       const id = action.payload;
       if (state.items[id]) {
-        state.items[id]++;
+        toast.info('Product already in cart');
       } else {
+        toast.success('Product added to cart');
         state.items[id] = 1;
       }
     },
@@ -28,7 +34,9 @@ const cartSlice = createSlice({
     },
     cartItemRemove: (state, action) => {
       delete state.items[action.payload];
-      state.productsFullInfo = state.productsFullInfo.filter((el) => el.id !== action.payload);
+      state.productsFullInfo = state.productsFullInfo.filter(
+        (el) => el.id !== action.payload
+      );
     },
     productFullInfoCleanUp: (state) => {
       state.productsFullInfo = [];
@@ -48,9 +56,23 @@ const cartSlice = createSlice({
         state.loading = 'failed';
         state.error = action.payload as string;
       });
+    //When Logout
+    // builder.addCase(authLogout, (state) => {
+    //   state.items = {};
+    //   state.productsFullInfo = [];
+    // });
   },
 });
 
-export { getCartTotalQuantitySelector, itemQuantityAvailabilityCheckingSelector, actGetProductsByItems };
-export const { addToCart, cartItemChangeQuantity, cartItemRemove, productFullInfoCleanUp } = cartSlice.actions;
+export {
+  getCartTotalQuantitySelector,
+  itemQuantityAvailabilityCheckingSelector,
+  actGetProductsByItems,
+};
+export const {
+  addToCart,
+  cartItemChangeQuantity,
+  cartItemRemove,
+  productFullInfoCleanUp,
+} = cartSlice.actions;
 export default cartSlice.reducer;

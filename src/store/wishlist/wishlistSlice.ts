@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import actLikeToggle from './act/actLikeToggle';
-import { IWishlist } from '@types';
+import { IWishlist, TProduct } from '@types';
 import actGetWishlist from './act/actGetWishlist';
+import { authLogout } from '@store/auth/authSlice';
 
 const initialState: IWishlist = {
   itemsId: [],
@@ -28,7 +29,9 @@ const wishlistSlice = createSlice({
         state.itemsId.push(action.payload.id);
       } else {
         state.itemsId = state.itemsId.filter((el) => el !== action.payload.id);
-        state.productsFullInfo = state.productsFullInfo.filter((el) => el.id !== action.payload.id);
+        state.productsFullInfo = state.productsFullInfo.filter(
+          (el) => el.id !== action.payload.id
+        );
       }
     });
     builder.addCase(actLikeToggle.rejected, (state, action) => {
@@ -42,10 +45,23 @@ const wishlistSlice = createSlice({
     });
     builder.addCase(actGetWishlist.fulfilled, (state, action) => {
       state.loading = 'succeeded';
-      state.productsFullInfo = action.payload;
+      if (action.payload.dataType === 'productsFullInfo') {
+        state.productsFullInfo = action.payload.data as TProduct[];
+      } else if (action.payload.dataType === 'productIds') {
+        state.itemsId = action.payload.data as number[];
+      }
+      // else {
+      //   state.itemsId = [];
+      //   state.productsFullInfo = [];
+      // }
     });
     builder.addCase(actGetWishlist.rejected, (state, action) => {
       state.error = action.payload as string;
+    });
+    // when logout
+    builder.addCase(authLogout, (state) => {
+      state.itemsId = [];
+      state.productsFullInfo = [];
     });
   },
 });

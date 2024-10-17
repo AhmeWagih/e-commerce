@@ -28,3 +28,15 @@ export interface IWishlist {
   error: null | string;
   loading: TLoading;
 }
+
+export interface IAuthState {
+  loading:TLoading,
+  error: string | null,
+  accessToken: string | null,
+  user: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | null
+}

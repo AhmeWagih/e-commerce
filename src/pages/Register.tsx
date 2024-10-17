@@ -1,41 +1,26 @@
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import useRegister from '@hooks/useRegister';
+import { Navigate } from 'react-router-dom';
+import { Form, Button, Row, Col, Spinner } from 'react-bootstrap';
 import Heading from '@components/common/Heading/Heading';
-import { RegisterSchema, RegisterType } from '@validations/RegisterSchema';
 import Input from '@components/forms/Input';
-import useCheckEmail from '@hooks/useCheckEmail';
+
 const Register = () => {
   const {
+    loading,
+    error,
+    accessToken,
     register,
     handleSubmit,
-    getFieldState,
-    trigger,
-    formState: { errors },
-  } = useForm<RegisterType>({
-    mode: 'onBlur',
-    resolver: zodResolver(RegisterSchema),
-  });
-  const {
+    submitForm,
     emailState,
-    enteredEmail,
-    checkEmailAvailability,
-    resetCheckEmailAvailability,
-  } = useCheckEmail();
-  const submitForm: SubmitHandler<RegisterType> = (data) => {
-    console.log(data);
-  };
-  const emailOnBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
-    await trigger('email');
-    const value = e.target.value;
-    const { isDirty, invalid } = getFieldState('email');
-    if (isDirty && !invalid && enteredEmail !== value) {
-      checkEmailAvailability(value);
-    }
-    if (isDirty && invalid && enteredEmail) {
-      resetCheckEmailAvailability();
-    }
-  };
+    emailOnBlur,
+    formErrors,
+  } = useRegister();
+  
+  if (accessToken) {
+    return <Navigate to="/" />;
+  }
+
   return (
     <>
       <Heading title="User Register" />
@@ -46,13 +31,13 @@ const Register = () => {
               label="First Name"
               name="firstName"
               register={register}
-              error={errors.firstName?.message}
+              error={formErrors.firstName?.message}
             />
             <Input
               label="Last Name"
               name="lastName"
               register={register}
-              error={errors.lastName?.message}
+              error={formErrors.lastName?.message}
             />
             <Input
               onBlur={emailOnBlur}
@@ -60,8 +45,8 @@ const Register = () => {
               name="email"
               register={register}
               error={
-                errors.email?.message
-                  ? errors.email?.message
+                formErrors.email?.message
+                  ? formErrors.email?.message
                   : emailState === 'unavailable'
                   ? 'This email is already in use.'
                   : emailState === 'failed'
@@ -85,18 +70,34 @@ const Register = () => {
               name="password"
               type="password"
               register={register}
-              error={errors.password?.message}
+              error={formErrors.password?.message}
             />
             <Input
               label="Confirm Password"
               name="confirmPassword"
               type="password"
               register={register}
-              error={errors.confirmPassword?.message}
+              error={formErrors.confirmPassword?.message}
             />
-            <Button variant="info" type="submit" style={{ color: 'white' }} disabled={emailState === "checking" ? true : false}>
-              Register
+            <Button
+              variant="info"
+              type="submit"
+              style={{ color: 'white' }}
+              disabled={
+                emailState === 'checking'
+                  ? true
+                  : false || loading === 'pending'
+              }
+            >
+              {loading === 'pending' ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                'Register'
+              )}
             </Button>
+            {error && (
+              <p style={{ color: '#DC3545', marginTop: '10px' }}>{error}</p>
+            )}
           </Form>
         </Col>
       </Row>
