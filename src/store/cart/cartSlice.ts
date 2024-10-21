@@ -7,7 +7,7 @@ import {
 
 import { ICartState } from '@types';
 import { toast } from 'react-toastify';
-// import { authLogout } from '@store/auth/authSlice';
+import { authLogout } from '@store/auth/authSlice';
 
 const initialState: ICartState = {
   items: {},
@@ -22,6 +22,7 @@ const cartSlice = createSlice({
   reducers: {
     addToCart: (state, action) => {
       const id = action.payload;
+      // const userId = action.meta?.userId;
       if (state.items[id]) {
         toast.info('Product already in cart');
       } else {
@@ -41,6 +42,10 @@ const cartSlice = createSlice({
     productFullInfoCleanUp: (state) => {
       state.productsFullInfo = [];
     },
+    cleanCart: (state) => {
+      state.items = {};
+      state.productsFullInfo = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -56,11 +61,11 @@ const cartSlice = createSlice({
         state.loading = 'failed';
         state.error = action.payload as string;
       });
-    //When Logout
-    // builder.addCase(authLogout, (state) => {
-    //   state.items = {};
-    //   state.productsFullInfo = [];
-    // });
+    // When Logout
+    builder.addCase(authLogout, (state) => {
+      state.items = {};
+      state.productsFullInfo = [];
+    });
   },
 });
 
@@ -74,5 +79,6 @@ export const {
   cartItemChangeQuantity,
   cartItemRemove,
   productFullInfoCleanUp,
+  cleanCart,
 } = cartSlice.actions;
 export default cartSlice.reducer;

@@ -5,8 +5,15 @@ import CartItemList from '@components/eCommerce/CartItemList/CartItemList';
 import useCart from '@hooks/useCart';
 import LottieHandler from '@components/feedback/lottieHandler/LottieHandler';
 const Cart = () => {
-  const { loading, error, products, changeQuantityHandler, removeItemHandler } =
-    useCart();
+  const {
+    loading,
+    error,
+    products,
+    changeQuantityHandler,
+    removeItemHandler,
+    userAccessToken,
+    placeOrderStatus,
+  } = useCart();
   return (
     <>
       <Heading title="Your Cart" />
@@ -18,10 +25,15 @@ const Cart = () => {
               changeQuantityHandler={changeQuantityHandler}
               removeItemHandler={removeItemHandler}
             />
-            <CartSubtotalPrice products={products} />
+            <CartSubtotalPrice
+              products={products}
+              userAccessToken={userAccessToken}
+            />
           </>
+        ) : placeOrderStatus === 'succeeded' ? (
+          <LottieHandler type="success" message="Your order has been placed successfully" />
         ) : (
-          <LottieHandler type='empty' message='Your cart is empty'/>
+          <LottieHandler type="empty" message="Your cart is empty" />
         )}
       </Loading>
     </>

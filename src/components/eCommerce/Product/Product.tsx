@@ -9,8 +9,9 @@ import Like from '@assets/svg/like-fill.svg?react';
 import styles from './styles.module.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ProductInfo from '../ProductInfo/ProductInfo';
 
-const { product, productImg, maximumNotice, wishlistBtn } = styles;
+const { maximumNotice, wishlistBtn } = styles;
 
 const Product = memo(
   ({ id, title, img, price, max, quantity, isLikeIt }: TProduct) => {
@@ -74,7 +75,7 @@ const Product = memo(
     
 
     return (
-      <div className={product}>
+      <ProductInfo title={title} price={price} img={img}>
         <ToastContainer />
         <div className={wishlistBtn} onClick={likeToggleHandler}>
           {isLoading ? (
@@ -85,11 +86,6 @@ const Product = memo(
             <DisLike />
           )}
         </div>
-        <div className={productImg}>
-          <img src={img} alt={title} />
-        </div>
-        <h2>{title}</h2>
-        <h3>{price.toFixed(2)} EGP</h3>
         <p className={maximumNotice}>
           {quantityReachedToMax
             ? 'Out of stock'
@@ -97,7 +93,7 @@ const Product = memo(
         </p>
         <Button
           variant="info"
-          style={{ color: 'white' }}
+          style={{ color: 'white', width: '100%' }}
           onClick={handleAddToCart}
           disabled={isBtnDisable || quantityReachedToMax}
         >
@@ -107,7 +103,7 @@ const Product = memo(
             'Add To Cart'
           )}
         </Button>
-      </div>
+      </ProductInfo>
     );
   }
 );

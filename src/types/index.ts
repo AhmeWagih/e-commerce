@@ -40,3 +40,14 @@ export interface IAuthState {
     email: string;
   } | null
 }
+
+export type TOrderItem={
+  id: number;
+  subtotal: number;
+  items: TProduct[];
+}
+export interface IOrdersSlice {
+  ordersList: TOrderItem[];
+  loading: TLoading;
+  error: string | null;
+}

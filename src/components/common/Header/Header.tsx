@@ -70,10 +70,10 @@ const Header = () => {
                   align="end"
                   className=" text-white"
                 >
-                  <NavDropdown.Item as={NavLink} to="profile">
+                  <NavDropdown.Item as={NavLink} to="profile" end>
                     Profile
                   </NavDropdown.Item>
-                  <NavDropdown.Item as={NavLink} to="cart">Orders</NavDropdown.Item>
+                  <NavDropdown.Item as={NavLink} to="profile/orders">Orders</NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item
                     as={NavLink}

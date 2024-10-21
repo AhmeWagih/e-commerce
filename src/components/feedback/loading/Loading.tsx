@@ -3,11 +3,13 @@ import CategorySkeleton from '../skeletons/CategorySkeleton';
 import ProductSkeleton from '../skeletons/ProductSkeleton';
 import CartSkeleton from '../skeletons/CartSkeleton';
 import LottieHandler from '../lottieHandler/LottieHandler';
+import TableSkeleton from '../skeletons/TableSkeleton';
 
 const skeletonsType = {
   category: <CategorySkeleton />,
   product: <ProductSkeleton />,
   cart: <CartSkeleton />,
+  table: <TableSkeleton />,
 };
 
 interface IProps {
@@ -17,14 +19,12 @@ interface IProps {
   type?: keyof typeof skeletonsType;
 }
 const Loading = ({ loading, error, children, type = 'category' }: IProps) => {
-  // const Skeleton = skeletonsType[type]
   if (loading === 'pending') {
-    // return <Skeleton />;
     return skeletonsType[type];
   } else if (loading === 'failed') {
     return (
       <div>
-        <LottieHandler type="error" message={error as string}/>
+        <LottieHandler type="error" message={error as string} />
       </div>
     );
   }

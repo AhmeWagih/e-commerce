@@ -1,6 +1,9 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
 const MainLayout = lazy(() => import('@layouts/MainLayout/MainLayout'));
+const ProfileLayout = lazy(() => import('@layouts/ProfileLayout/ProfileLayout'));
+
 const Home = lazy(() => import('@pages/Home'));
 const Categories = lazy(() => import('@pages/Categories'));
 const Products = lazy(() => import('@pages/Products'));
@@ -10,10 +13,13 @@ const Register = lazy(() => import('@pages/Register'));
 const Login = lazy(() => import('@pages/Login'));
 const Cart = lazy(() => import('@pages/Cart'));
 const Wishlist = lazy(() => import('@pages/Wishlist'));
+const Orders = lazy(() => import('@pages/Orders'));
+
 import Error from '@pages/Error';
 import SuspenseFallback from '@components/feedback/suspenseFallback/SuspenseFallback';
 import LottieHandler from '@components/feedback/lottieHandler/LottieHandler';
 import ProtectedRout from '@components/auth/ProtectedRout';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -90,9 +96,19 @@ const router = createBrowserRouter([
         path: 'profile',
         element: (
           <ProtectedRout>
-            <SuspenseFallback>{<Profile />}</SuspenseFallback>
+            <SuspenseFallback>{<ProfileLayout />}</SuspenseFallback>
           </ProtectedRout>
         ),
+        children: [
+          {
+            index: true,
+            element: <SuspenseFallback>{<Profile />}</SuspenseFallback>,
+          },
+          {
+            path: 'orders',
+            element: <SuspenseFallback>{<Orders />}</SuspenseFallback>,
+          },
+        ],
       },
     ],
   },
