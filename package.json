@@ -1,0 +1,24 @@
+{
+  "name": "e-commerce",
+  "version": "1.0.0",
+  "description": "Monorepo for full stack e-commerce website with Node.js (backend) and Angular (frontend)",
+  "private": true,
+  "homepage": "https://github.com/AhmeWagih/e-commerce#readme",
+  "bugs": {
+    "url": "https://github.com/AhmeWagih/e-commerce/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AhmeWagih/e-commerce.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "go:api": "cd apps/api && npm run start:dev",
+    "go:web": "cd apps/web && npm run start:dev"
+  }
+}
