@@ -8,7 +8,7 @@
     "start:dev": "nodemon server.js",
     "start:prod": "nodemon server.js"
   },
-  "author": "Mohamed Fathy",
+  "author": "FAWAZA",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
