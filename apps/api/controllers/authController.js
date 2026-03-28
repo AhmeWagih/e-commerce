@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
-
+const Cart = require('../models/cartModel');
 const catchAsync = require('../utils/catchAsync');
 const User = require('../models/userModel');
 const AppError = require('../utils/AppError');
@@ -92,6 +92,11 @@ const sendEmailConfirmationUrl = async (user) => {
 // Signup
 exports.signUp = catchAsync(async (req, res, next) => {
   const user = await User.create(req.body);
+
+  //create a cart for a new user
+  await Cart.create({
+    user: user._id,
+  });
 
   await new Email(user).sendWelcome();
 
