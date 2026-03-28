@@ -252,7 +252,7 @@
 <!-- Add Product Modal -->
 @if (showForm()) {
   <app-product-form
-    (created)="onProductCreated($event)"
+    (saved)="onProductCreated($event)"
     (cancelled)="showForm.set(false)"
   />
 }

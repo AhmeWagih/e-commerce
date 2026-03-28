@@ -1,7 +1,8 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../services/product.service';
 import type { Product } from '../product.types';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-product-form',
@@ -9,14 +10,19 @@ import type { Product } from '../product.types';
   imports: [FormsModule],
   templateUrl: './product-form.component.html',
 })
-export class ProductFormComponent {
+export class ProductFormComponent implements OnInit {
   private productService = inject(ProductService);
 
-  created = output<Product>();
+  /** Pass an existing product to enable edit mode */
+  product = input<Product | null>(null);
+
+  saved = output<Product>();
   cancelled = output<void>();
 
   loading = signal(false);
   error = signal<string | null>(null);
+
+  get isEditMode() { return !!this.product(); }
 
   form = {
     title: '',
@@ -29,13 +35,40 @@ export class ProductFormComponent {
     specifications: '',
   };
 
+  // New file selected by the user
   imageCoverFile = signal<File | null>(null);
-  imageCoverPreview = signal<string | null>(null);
+  imageCoverPreview = signal<string | null>(null);   // data-URL of new file
+  existingCoverUrl = signal<string | null>(null);    // URL already stored in DB
+
   imageFiles = signal<File[]>([]);
-  imagePreviews = signal<string[]>([]);
+  imagePreviews = signal<string[]>([]);              // data-URLs for new files
+  existingImageUrls = signal<string[]>([]);          // URLs already stored in DB
 
   readonly currencies = ['USD', 'EUR', 'GBP', 'EGP', 'SAR', 'AED'];
 
+  ngOnInit() {
+    const p = this.product();
+    if (!p) return;
+
+    this.form.title = p.title;
+    this.form.brand = p.brand;
+    this.form.price = p.price;
+    this.form.currency = p.currency;
+    this.form.quantity = p.quantity;
+    this.form.discount = p.discount ?? 0;
+    this.form.description = p.description ?? '';
+    this.form.specifications = p.specifications ?? '';
+
+    if (p.imageCover) this.existingCoverUrl.set(this.getImageUrl(p.imageCover));
+    if (p.images?.length) this.existingImageUrls.set(p.images.map((img) => this.getImageUrl(img)));
+  }
+
+  getImageUrl(filename: string): string {
+    if (filename.startsWith('http')) return filename;
+    return `${environment.apiBaseUrl.replace('/api/v1', '')}/uploads/Products/${filename}`;
+  }
+
+  // ── Cover image ────────────────────────────────────────────────
   onCoverChange(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
     this.imageCoverFile.set(file);
@@ -48,14 +81,22 @@ export class ProductFormComponent {
     }
   }
 
+  removeCover() {
+    this.imageCoverFile.set(null);
+    this.imageCoverPreview.set(null);
+    this.existingCoverUrl.set(null);
+  }
+
+  // ── Extra images ────────────────────────────────────────────────
   onImagesChange(event: Event) {
     const files = Array.from((event.target as HTMLInputElement).files ?? []);
-    const merged = [...this.imageFiles(), ...files].slice(0, 7);
+    const totalExisting = this.existingImageUrls().length;
+    const merged = [...this.imageFiles(), ...files].slice(0, 7 - totalExisting);
     this.imageFiles.set(merged);
 
-    const previews: string[] = [];
-    let loaded = 0;
     if (merged.length === 0) { this.imagePreviews.set([]); return; }
+    const previews: string[] = new Array(merged.length);
+    let loaded = 0;
     merged.forEach((file, i) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -67,16 +108,12 @@ export class ProductFormComponent {
     });
   }
 
-  removeImage(index: number) {
+  removeNewImage(index: number) {
     this.imageFiles.update((files) => files.filter((_, i) => i !== index));
     this.imagePreviews.update((previews) => previews.filter((_, i) => i !== index));
   }
 
-  removeCover() {
-    this.imageCoverFile.set(null);
-    this.imageCoverPreview.set(null);
-  }
-
+  // ── Submit ────────────────────────────────────────────────────
   submit() {
     this.error.set(null);
 
@@ -103,14 +140,20 @@ export class ProductFormComponent {
     if (cover) fd.append('imageCover', cover);
     this.imageFiles().forEach((file) => fd.append('images', file));
 
-    this.productService.createProduct(fd).subscribe({
+    const p = this.product();
+    const obs$ = p
+      ? this.productService.updateProduct(p._id, fd)
+      : this.productService.createProduct(fd);
+
+    obs$.subscribe({
       next: (res) => {
         this.loading.set(false);
-        this.created.emit(res.data.newProduct);
+        const saved = p ? res.data.updatedProduct : res.data.newProduct;
+        this.saved.emit(saved);
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err.error?.message || 'Failed to create product.');
+        this.error.set(err.error?.message || `Failed to ${p ? 'update' : 'create'} product.`);
       },
     });
   }

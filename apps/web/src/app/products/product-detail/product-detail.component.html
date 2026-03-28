@@ -9,34 +9,46 @@
       Back to Products
     </a>
 
-    <!-- Delete button (admin/seller) -->
+    <!-- Actions (admin/seller) -->
     @if (auth.canManageProducts() && product()) {
-      @if (confirmDelete()) {
-        <div class="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2">
-          <span class="text-sm font-semibold text-red-700">Delete this product?</span>
-          <button
-            (click)="confirmDelete.set(false)"
-            class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50"
-          >
-            Cancel
-          </button>
-          <button
-            (click)="onDeleteConfirmed()"
-            [disabled]="deleting()"
-            class="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
-          >
-            @if (deleting()) { Deleting… } @else { Yes, Delete }
-          </button>
-        </div>
-      } @else {
+      <div class="flex items-center gap-3">
+        <!-- Edit -->
         <button
-          (click)="confirmDelete.set(true)"
-          class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-100"
+          (click)="showEditForm.set(true)"
+          class="inline-flex items-center gap-2 rounded-xl bg-[#0f2f7f] px-4 py-2.5 text-sm font-bold text-white shadow transition hover:bg-[#0a1f52] active:scale-95"
         >
-          <span class="material-symbols-outlined text-[18px]">delete</span>
-          Delete Product
+          <span class="material-symbols-outlined text-[18px]">edit</span>
+          Edit
         </button>
-      }
+
+        <!-- Delete -->
+        @if (confirmDelete()) {
+          <div class="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2">
+            <span class="text-sm font-semibold text-red-700">Delete this product?</span>
+            <button
+              (click)="confirmDelete.set(false)"
+              class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              (click)="onDeleteConfirmed()"
+              [disabled]="deleting()"
+              class="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
+            >
+              @if (deleting()) { Deleting… } @else { Yes, Delete }
+            </button>
+          </div>
+        } @else {
+          <button
+            (click)="confirmDelete.set(true)"
+            class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-100"
+          >
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+            Delete
+          </button>
+        }
+      </div>
     }
   </div>
 
@@ -218,3 +230,12 @@
     </div>
   }
 </div>
+
+<!-- Edit Product Modal -->
+@if (showEditForm() && product()) {
+  <app-product-form
+    [product]="product()"
+    (saved)="onProductUpdated($event)"
+    (cancelled)="showEditForm.set(false)"
+  />
+}

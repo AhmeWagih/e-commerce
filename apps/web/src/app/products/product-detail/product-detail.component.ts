@@ -2,13 +2,14 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { AuthService } from '../../services/auth.service';
+import { ProductFormComponent } from '../product-form/product-form.component';
 import type { Product } from '../product.types';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, ProductFormComponent],
   templateUrl: './product-detail.component.html',
 })
 export class ProductDetailComponent implements OnInit {
@@ -24,6 +25,7 @@ export class ProductDetailComponent implements OnInit {
 
   deleting = signal(false);
   confirmDelete = signal(false);
+  showEditForm = signal(false);
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('productId');
@@ -44,6 +46,15 @@ export class ProductDetailComponent implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  onProductUpdated(updated: Product) {
+    this.product.set(updated);
+    this.showEditForm.set(false);
+    // Refresh selected image in case cover changed
+    if (updated.imageCover) {
+      this.selectedImage.set(this.getImageUrl(updated.imageCover));
+    }
   }
 
   onDeleteConfirmed() {
