@@ -5,6 +5,8 @@ import { RedirectComponent } from './redirect/redirect.component';
 import { SigninComponent } from './signin/signin.component';
 import { SignupComponent } from './signup/signup.component';
 import { BaseLayoutComponent } from './layout/base-layout.component';
+import { ProductsComponent } from './products/products.component';
+import { ProductDetailComponent } from './products/product-detail/product-detail.component';
 
 export const routes: Routes = [
   {
@@ -36,6 +38,14 @@ export const routes: Routes = [
       {
         path: 'profile',
         component: ProfileComponent,
+      },
+      {
+        path: 'products',
+        component: ProductsComponent,
+      },
+      {
+        path: 'products/:productId',
+        component: ProductDetailComponent,
       },
     ],
   },
