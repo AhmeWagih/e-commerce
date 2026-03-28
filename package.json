@@ -19,6 +19,6 @@
   ],
   "scripts": {
     "go:api": "cd apps/api && npm run start:dev",
-    "go:web": "cd apps/web && npm run start:dev"
+    "go:web": "cd apps/web && npm run start"
   }
 }

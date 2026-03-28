@@ -5,8 +5,6 @@ const Product = require('../models/productModel');
 
 //Controllers
 const productController = require('../controllers/productController');
-// const reveiwRoute = require('./reviewRoutes');
-const authController = require('../controllers/authController');
 
 //Middlewares
 const protect = require('../middlewares/protect');

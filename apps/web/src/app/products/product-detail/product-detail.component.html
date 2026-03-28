@@ -1,0 +1,220 @@
+<div class="pb-12">
+  <!-- Back -->
+  <div class="mb-8 flex items-center justify-between">
+    <a
+      routerLink="/products"
+      class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-[#0f2f7f]"
+    >
+      <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+      Back to Products
+    </a>
+
+    <!-- Delete button (admin/seller) -->
+    @if (auth.canManageProducts() && product()) {
+      @if (confirmDelete()) {
+        <div class="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2">
+          <span class="text-sm font-semibold text-red-700">Delete this product?</span>
+          <button
+            (click)="confirmDelete.set(false)"
+            class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="onDeleteConfirmed()"
+            [disabled]="deleting()"
+            class="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-700 disabled:opacity-60"
+          >
+            @if (deleting()) { Deleting… } @else { Yes, Delete }
+          </button>
+        </div>
+      } @else {
+        <button
+          (click)="confirmDelete.set(true)"
+          class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-100"
+        >
+          <span class="material-symbols-outlined text-[18px]">delete</span>
+          Delete Product
+        </button>
+      }
+    }
+  </div>
+
+  <!-- Loading Skeleton -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-2 animate-pulse">
+      <div class="space-y-3">
+        <div class="h-96 w-full rounded-2xl bg-slate-200"></div>
+        <div class="flex gap-3">
+          @for (i of [1,2,3]; track i) {
+            <div class="h-20 w-20 rounded-xl bg-slate-200"></div>
+          }
+        </div>
+      </div>
+      <div class="space-y-4 pt-4">
+        <div class="h-3 w-24 rounded bg-slate-200"></div>
+        <div class="h-8 w-3/4 rounded bg-slate-200"></div>
+        <div class="h-4 w-1/3 rounded bg-slate-200"></div>
+        <div class="h-6 w-1/4 rounded bg-slate-200"></div>
+        <div class="mt-6 space-y-2">
+          <div class="h-3 w-full rounded bg-slate-200"></div>
+          <div class="h-3 w-full rounded bg-slate-200"></div>
+          <div class="h-3 w-2/3 rounded bg-slate-200"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (!loading() && error()) {
+    <div class="flex flex-col items-center justify-center gap-4 rounded-2xl border border-red-100 bg-red-50 py-24 text-center">
+      <span class="material-symbols-outlined text-5xl text-red-400">error_outline</span>
+      <p class="text-base font-semibold text-red-700">{{ error() }}</p>
+      <a
+        routerLink="/products"
+        class="inline-flex items-center gap-2 rounded-xl bg-[#0f2f7f] px-6 py-2.5 text-sm font-bold uppercase tracking-[0.1em] text-white transition hover:bg-[#0a1f52]"
+      >
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        Go Back
+      </a>
+    </div>
+  }
+
+  <!-- Product Detail -->
+  @if (!loading() && !error() && product()) {
+    <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
+      <!-- Images -->
+      <div class="space-y-4">
+        <!-- Main Image -->
+        <div class="relative h-96 overflow-hidden rounded-2xl bg-slate-50 lg:h-[480px]">
+          @if (selectedImage()) {
+            <img
+              [src]="selectedImage()"
+              [alt]="product()!.title"
+              class="h-full w-full object-cover"
+            />
+          } @else {
+            <div class="flex h-full items-center justify-center">
+              <span class="material-symbols-outlined text-7xl text-slate-200">image_not_supported</span>
+            </div>
+          }
+
+          @if (product()!.discount && product()!.discount! > 0) {
+            <span class="absolute left-4 top-4 rounded-full bg-red-500 px-3 py-1.5 text-sm font-bold text-white shadow">
+              -{{ product()!.discount }}% OFF
+            </span>
+          }
+        </div>
+
+        <!-- Thumbnail Strip -->
+        @if (allImages.length > 1) {
+          <div class="flex gap-3 overflow-x-auto pb-1">
+            @for (img of allImages; track img) {
+              <button
+                (click)="selectImage(img)"
+                class="h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition"
+                [class]="selectedImage() === img
+                  ? 'border-[#0f2f7f]'
+                  : 'border-slate-200 hover:border-slate-400'"
+              >
+                <img [src]="img" [alt]="product()!.title" class="h-full w-full object-cover" />
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Info -->
+      <div class="flex flex-col gap-6">
+        <!-- Brand & Category -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="rounded-full border border-[#0f2f7f]/20 bg-[#0f2f7f]/5 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-[#0f2f7f]">
+            {{ product()!.brand }}
+          </span>
+          @if (product()!.category) {
+            <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+              {{ product()!.category!.name }}
+            </span>
+          }
+        </div>
+
+        <!-- Title -->
+        <h1 class="font-headline text-3xl font-black tracking-[-0.02em] text-slate-900 sm:text-4xl lg:text-5xl">
+          {{ product()!.title }}
+        </h1>
+
+        <!-- Price -->
+        <div class="flex items-end gap-4">
+          @if (product()!.discount && product()!.discount! > 0) {
+            <div>
+              <p class="text-sm text-slate-400 line-through">
+                {{ formatPrice(product()!.price, product()!.currency) }}
+              </p>
+              <p class="text-3xl font-black text-red-600">
+                {{ formatPrice(getDiscountedPrice(product()!), product()!.currency) }}
+              </p>
+            </div>
+            <span class="mb-1 rounded-full bg-red-50 px-3 py-1 text-sm font-bold text-red-600">
+              Save {{ formatPrice(product()!.price - getDiscountedPrice(product()!), product()!.currency) }}
+            </span>
+          } @else {
+            <p class="text-3xl font-black text-slate-900">
+              {{ formatPrice(product()!.price, product()!.currency) }}
+            </p>
+          }
+        </div>
+
+        <!-- Stock Badge -->
+        <div>
+          @if (product()!.quantity > 0) {
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              In Stock · {{ product()!.quantity }} available
+            </span>
+          } @else {
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-500">
+              <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+              Out of Stock
+            </span>
+          }
+        </div>
+
+        <!-- Divider -->
+        <hr class="border-slate-100" />
+
+        <!-- Description -->
+        @if (product()!.description) {
+          <div>
+            <h2 class="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Description</h2>
+            <p class="text-sm leading-relaxed text-slate-600">{{ product()!.description }}</p>
+          </div>
+        }
+
+        <!-- Specifications -->
+        @if (product()!.specifications) {
+          <div>
+            <h2 class="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Specifications</h2>
+            <p class="whitespace-pre-line text-sm leading-relaxed text-slate-600">{{ product()!.specifications }}</p>
+          </div>
+        }
+
+        <!-- CTA -->
+        <div class="mt-auto flex flex-col gap-3 sm:flex-row">
+          <button
+            [disabled]="product()!.quantity === 0"
+            class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f2f7f] px-6 py-3.5 text-sm font-bold uppercase tracking-[0.1em] text-white shadow-lg transition hover:bg-[#0a1f52] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+            Add to Cart
+          </button>
+          <button
+            class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-6 py-3.5 text-sm font-bold uppercase tracking-[0.1em] text-slate-700 transition hover:border-[#0f2f7f] hover:text-[#0f2f7f]"
+          >
+            <span class="material-symbols-outlined text-[18px]">favorite_border</span>
+            Wishlist
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

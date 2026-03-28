@@ -1,9 +1,13 @@
+const fs = require('fs');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const Product = require('../models/productModel');
 const multer = require('multer');
 const sharp = require('sharp');
 const APIFeatures = require('../utils/APIFeatures');
+
+// Ensure upload directory exists
+fs.mkdirSync('uploads/Products', { recursive: true });
 
 const memoryStorage = multer.memoryStorage();
 
@@ -27,14 +31,15 @@ exports.uploadProductImages = upload.fields([
 
 
 exports.resizeImages = catchAsync(async (req, res, next) => {
-  // Check if files were uploaded
   if (!req.files || (!req.files.imageCover && !req.files.images)) {
-    return next(); // Skip if no files are present
+    return next();
   }
 
-  // Process imageCover if present
+  // Use existing productId for updates, or a timestamp token for new products
+  const idToken = req.params.productId || `new-${Date.now()}`;
+
   if (req.files.imageCover) {
-    req.body.imageCover = `product-${req.params.productId}-${Date.now()}-cover.jpeg`;
+    req.body.imageCover = `product-${idToken}-cover.jpeg`;
     await sharp(req.files.imageCover[0].buffer)
       .resize(2000, 1333)
       .toFormat('jpeg')
@@ -42,12 +47,11 @@ exports.resizeImages = catchAsync(async (req, res, next) => {
       .toFile(`uploads/Products/${req.body.imageCover}`);
   }
 
-  // Process images if present
   if (req.files.images) {
     req.body.images = [];
     await Promise.all(
       req.files.images.map(async (file, i) => {
-        const filename = `product-${req.params.productId}-${Date.now()}-${i + 1}.jpeg`;
+        const filename = `product-${idToken}-${Date.now()}-${i + 1}.jpeg`;
         await sharp(file.buffer)
           .resize(2000, 1333)
           .toFormat('jpeg')
@@ -71,7 +75,7 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
     .filter()
     .sort()
     .limitFields()
-    .pagination();
+    .paginate();
 
   //get the products
   const products = await features.query;

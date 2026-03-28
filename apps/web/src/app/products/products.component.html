@@ -1,0 +1,258 @@
+<div class="space-y-10 pb-12">
+  <!-- Page Header -->
+  <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-[#0f2f7f]">Archive</p>
+      <h1 class="font-headline text-4xl font-black tracking-[-0.02em] text-slate-900 sm:text-5xl">
+        All Products
+      </h1>
+      <p class="mt-3 text-base text-slate-500">
+        @if (!loading() && !error()) {
+          {{ filteredProducts().length }} artifact{{ filteredProducts().length !== 1 ? 's' : '' }} found
+        }
+      </p>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <!-- Search -->
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">search</span>
+        <input
+          type="text"
+          placeholder="Search products..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none ring-0 transition focus:border-[#0f2f7f] focus:ring-2 focus:ring-[#0f2f7f]/10 sm:w-64"
+        />
+      </div>
+
+      <!-- Sort -->
+      <select
+        [ngModel]="sortOption()"
+        (ngModelChange)="onSortChange($event)"
+        class="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-[#0f2f7f] focus:ring-2 focus:ring-[#0f2f7f]/10"
+      >
+        <option value="">Default sort</option>
+        <option value="price">Price: Low → High</option>
+        <option value="-price">Price: High → Low</option>
+        <option value="-createdAt">Newest first</option>
+        <option value="title">Name A → Z</option>
+      </select>
+
+      <!-- Add Product (seller / admin) -->
+      @if (auth.canManageProducts()) {
+        <button
+          (click)="showForm.set(true)"
+          class="inline-flex h-10 items-center gap-2 rounded-xl bg-[#0f2f7f] px-5 text-sm font-bold uppercase tracking-[0.1em] text-white shadow transition hover:bg-[#0a1f52] active:scale-95"
+        >
+          <span class="material-symbols-outlined text-[18px]">add</span>
+          Add Product
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Loading Skeleton -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      @for (item of [1,2,3,4,5,6,7,8]; track item) {
+        <div class="animate-pulse rounded-2xl bg-slate-100 overflow-hidden">
+          <div class="h-56 bg-slate-200"></div>
+          <div class="p-5 space-y-3">
+            <div class="h-3 w-1/3 rounded bg-slate-200"></div>
+            <div class="h-4 w-3/4 rounded bg-slate-200"></div>
+            <div class="h-3 w-1/2 rounded bg-slate-200"></div>
+            <div class="h-5 w-1/4 rounded bg-slate-200"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (!loading() && error()) {
+    <div class="flex flex-col items-center justify-center gap-4 rounded-2xl border border-red-100 bg-red-50 py-20 text-center">
+      <span class="material-symbols-outlined text-5xl text-red-400">error_outline</span>
+      <p class="text-base font-semibold text-red-700">{{ error() }}</p>
+      <button
+        (click)="loadProducts()"
+        class="inline-flex items-center gap-2 rounded-xl bg-[#0f2f7f] px-6 py-2.5 text-sm font-bold uppercase tracking-[0.1em] text-white transition hover:bg-[#0a1f52]"
+      >
+        <span class="material-symbols-outlined text-[18px]">refresh</span>
+        Retry
+      </button>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && !error() && filteredProducts().length === 0) {
+    <div class="flex flex-col items-center justify-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 py-20 text-center">
+      <span class="material-symbols-outlined text-5xl text-slate-300">inventory_2</span>
+      <p class="text-base font-semibold text-slate-500">No products found</p>
+      @if (searchQuery()) {
+        <p class="text-sm text-slate-400">Try adjusting your search query</p>
+        <button
+          (click)="searchQuery.set('')"
+          class="text-sm font-semibold text-[#0f2f7f] underline"
+        >
+          Clear search
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Products Grid -->
+  @if (!loading() && !error() && filteredProducts().length > 0) {
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      @for (product of filteredProducts(); track product._id) {
+        <div class="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:shadow-lg hover:-translate-y-0.5">
+
+          <!-- Delete button (admin/seller) -->
+          @if (auth.canManageProducts()) {
+            @if (confirmDeleteId() === product._id) {
+              <!-- Confirm overlay -->
+              <div class="absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-2 rounded-t-2xl bg-red-600 px-4 py-2.5">
+                <span class="text-xs font-bold text-white">Delete this product?</span>
+                <div class="flex gap-2">
+                  <button
+                    (click)="cancelDelete()"
+                    class="rounded-lg border border-white/40 px-3 py-1 text-xs font-bold text-white transition hover:bg-white/20"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    (click)="confirmDelete(product._id)"
+                    [disabled]="deletingId() === product._id"
+                    class="rounded-lg bg-white px-3 py-1 text-xs font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-60"
+                  >
+                    @if (deletingId() === product._id) { Deleting… } @else { Confirm }
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <button
+                (click)="requestDelete(product._id); $event.preventDefault()"
+                class="absolute right-3 top-3 z-20 grid h-8 w-8 place-content-center rounded-full bg-white/90 text-slate-400 opacity-0 shadow transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+                title="Delete product"
+              >
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+            }
+          }
+
+          <!-- Card link area -->
+          <a
+            [routerLink]="['/products', product._id]"
+            class="flex flex-1 flex-col"
+          >
+            <!-- Image -->
+            <div class="relative h-56 overflow-hidden bg-slate-50">
+              @if (getImageUrl(product.imageCover)) {
+                <img
+                  [src]="getImageUrl(product.imageCover)"
+                  [alt]="product.title"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              } @else {
+                <div class="flex h-full w-full items-center justify-center">
+                  <span class="material-symbols-outlined text-6xl text-slate-200">image_not_supported</span>
+                </div>
+              }
+
+              @if (product.discount && product.discount > 0) {
+                <span class="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">
+                  -{{ product.discount }}%
+                </span>
+              }
+
+              @if (product.quantity === 0) {
+                <div class="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+                  <span class="rounded-full bg-white/90 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-slate-700">
+                    Out of Stock
+                  </span>
+                </div>
+              }
+            </div>
+
+            <!-- Info -->
+            <div class="flex flex-1 flex-col p-5">
+              <p class="mb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                {{ product.brand }}
+                @if (product.category) {
+                  · {{ product.category.name }}
+                }
+              </p>
+              <h3 class="flex-1 text-sm font-bold leading-snug text-slate-800 group-hover:text-[#0f2f7f] transition-colors line-clamp-2">
+                {{ product.title }}
+              </h3>
+
+              <div class="mt-4 flex items-end justify-between">
+                <div>
+                  @if (product.discount && product.discount > 0) {
+                    <p class="text-[11px] text-slate-400 line-through">
+                      {{ formatPrice(product.price, product.currency) }}
+                    </p>
+                    <p class="text-base font-black text-red-600">
+                      {{ formatPrice(getDiscountedPrice(product), product.currency) }}
+                    </p>
+                  } @else {
+                    <p class="text-base font-black text-slate-900">
+                      {{ formatPrice(product.price, product.currency) }}
+                    </p>
+                  }
+                </div>
+                <span
+                  class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition group-hover:border-[#0f2f7f] group-hover:bg-[#0f2f7f] group-hover:text-white"
+                >
+                  <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <div class="flex items-center justify-center gap-2 pt-4">
+        <button
+          (click)="onPageChange(currentPage() - 1)"
+          [disabled]="currentPage() === 1"
+          class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-[#0f2f7f] hover:text-[#0f2f7f] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+        </button>
+
+        @for (page of pageNumbers; track page) {
+          <button
+            (click)="onPageChange(page)"
+            class="flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition"
+            [class]="currentPage() === page
+              ? 'border-[#0f2f7f] bg-[#0f2f7f] text-white'
+              : 'border-slate-200 text-slate-600 hover:border-[#0f2f7f] hover:text-[#0f2f7f]'"
+          >
+            {{ page }}
+          </button>
+        }
+
+        <button
+          (click)="onPageChange(currentPage() + 1)"
+          [disabled]="currentPage() === totalPages"
+          class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-[#0f2f7f] hover:text-[#0f2f7f] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- Add Product Modal -->
+@if (showForm()) {
+  <app-product-form
+    (created)="onProductCreated($event)"
+    (cancelled)="showForm.set(false)"
+  />
+}
