@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 
@@ -6,6 +7,9 @@ const productRouter = require("./routers/productRoutes");
 
 const app = express();
 app.use(express.json());
+
+// Serve uploaded images as static files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(
   cors({

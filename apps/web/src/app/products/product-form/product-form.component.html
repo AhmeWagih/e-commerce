@@ -7,7 +7,7 @@
 
   <!-- Modal -->
   <div
-    class="relative z-10 w-full max-w-xl rounded-2xl bg-white shadow-2xl"
+    class="relative z-10 w-full max-w-2xl rounded-2xl bg-white shadow-2xl"
     (click)="$event.stopPropagation()"
   >
     <!-- Header -->
@@ -25,7 +25,7 @@
     </div>
 
     <!-- Body -->
-    <div class="max-h-[70vh] overflow-y-auto px-6 py-5">
+    <div class="max-h-[72vh] overflow-y-auto px-6 py-5">
       @if (error()) {
         <div class="mb-4 flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
           <span class="material-symbols-outlined text-[18px] shrink-0">error_outline</span>
@@ -33,7 +33,92 @@
         </div>
       }
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+        <!-- ── Cover Image ── -->
+        <div class="sm:col-span-2">
+          <label class="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+            Cover Image
+          </label>
+          @if (imageCoverPreview()) {
+            <div class="relative inline-block">
+              <img
+                [src]="imageCoverPreview()!"
+                alt="Cover preview"
+                class="h-40 w-full rounded-xl object-cover sm:w-64"
+              />
+              <button
+                (click)="removeCover()"
+                class="absolute -right-2 -top-2 grid h-6 w-6 place-content-center rounded-full bg-red-500 text-white shadow"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[14px]">close</span>
+              </button>
+            </div>
+          } @else {
+            <label
+              class="flex h-32 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400 transition hover:border-[#0f2f7f]/40 hover:bg-[#0f2f7f]/5"
+            >
+              <span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
+              <span class="text-xs font-semibold">Click to upload cover image</span>
+              <span class="text-[11px] text-slate-400">JPEG, PNG, WEBP</span>
+              <input
+                type="file"
+                accept="image/*"
+                class="hidden"
+                (change)="onCoverChange($event)"
+              />
+            </label>
+          }
+        </div>
+
+        <!-- ── Extra Images ── -->
+        <div class="sm:col-span-2">
+          <label class="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+            Extra Images
+            <span class="normal-case font-normal text-slate-400">(up to 7)</span>
+          </label>
+
+          <div class="flex flex-wrap gap-3">
+            <!-- Preview thumbnails -->
+            @for (preview of imagePreviews(); track $index) {
+              <div class="relative">
+                <img
+                  [src]="preview"
+                  alt="Preview"
+                  class="h-20 w-20 rounded-xl object-cover border border-slate-200"
+                />
+                <button
+                  (click)="removeImage($index)"
+                  class="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-content-center rounded-full bg-red-500 text-white shadow"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[12px]">close</span>
+                </button>
+              </div>
+            }
+
+            <!-- Add more button -->
+            @if (imageFiles().length < 7) {
+              <label
+                class="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400 transition hover:border-[#0f2f7f]/40 hover:bg-[#0f2f7f]/5"
+              >
+                <span class="material-symbols-outlined text-xl">add</span>
+                <span class="text-[10px] font-semibold mt-0.5">Add</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  class="hidden"
+                  (change)="onImagesChange($event)"
+                />
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- ── Text Fields ── -->
+
         <!-- Title -->
         <div class="sm:col-span-2">
           <label class="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
@@ -164,7 +249,7 @@
       >
         @if (loading()) {
           <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-          Saving...
+          Saving…
         } @else {
           <span class="material-symbols-outlined text-[18px]">add</span>
           Add Product

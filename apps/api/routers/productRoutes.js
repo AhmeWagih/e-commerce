@@ -18,7 +18,13 @@ const router = express.Router({ mergeParams: true });
 router
   .route('/')
   .get(productController.getAllProducts)
-  .post(protect, restrictTo('seller', 'admin'), productController.createProduct)
+  .post(
+    protect,
+    restrictTo('seller', 'admin'),
+    productController.uploadProductImages,
+    productController.resizeImages,
+    productController.createProduct
+  )
   .delete(protect, restrictTo('admin'), productController.deleteAllProducts);
 
 router
