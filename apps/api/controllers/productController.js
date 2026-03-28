@@ -4,7 +4,6 @@ const Product = require('../models/productModel');
 const multer = require('multer');
 const sharp = require('sharp');
 const APIFeatures = require('../utils/APIFeatures');
-const redisClient = require('../utils/caching');
 
 const memoryStorage = multer.memoryStorage();
 
@@ -77,9 +76,6 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
   //get the products
   const products = await features.query;
 
-  await redisClient.json.set('products', '$', products);
-  await redisClient.expire('products', 1300);
-
   res.status(200).json({
     status: 'success',
     data: {
@@ -89,12 +85,7 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
 });
 
 exports.getProduct = catchAsync(async (req, res, next) => {
-  const products = await redisClient.json.get('products', '$');
-
-  let product;
-  if (!products) {
-    product = await Product.findById(req.params.productId);
-  } else product = products.filter((p) => p._id == req.params.productId);
+  const product = await Product.findById(req.params.productId);
 
   if (!product) return next(new AppError('Not found a product!', 400));
 
