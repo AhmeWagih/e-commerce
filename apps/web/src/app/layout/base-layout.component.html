@@ -1,0 +1,59 @@
+<div class="min-h-screen bg-[radial-gradient(circle_at_top_left,#f3f7ff_0%,#fdfdfd_42%,#f8fafc_100%)] text-slate-900">
+  <header class="fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
+    <nav class="mx-auto flex h-18 max-w-screen-2xl items-center justify-between px-5 sm:px-8">
+      <a
+        routerLink="/home"
+        class="text-xl sm:text-2xl font-black tracking-[-0.03em] uppercase text-[#0f2f7f]"
+      >
+        Atheneum
+      </a>
+
+      <div class="hidden items-center gap-7 text-[13px] font-semibold uppercase tracking-[0.14em] md:flex">
+        <a routerLink="/home" routerLinkActive="text-[#0f2f7f]" class="text-slate-500 transition hover:text-slate-900"
+          >Home</a
+        >
+        <a
+          routerLink="/profile"
+          routerLinkActive="text-[#0f2f7f]"
+          class="text-slate-500 transition hover:text-slate-900"
+          >Profile</a
+        >
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-4">
+        <button
+          class="grid h-10 w-10 place-content-center rounded-full border border-slate-200 text-[#0f2f7f] transition hover:bg-slate-100"
+          type="button"
+          aria-label="Cart"
+        >
+          <span class="material-symbols-outlined">shopping_bag</span>
+        </button>
+        <a
+          routerLink="/profile"
+          class="grid h-10 w-10 place-content-center rounded-full border border-[#0f2f7f]/20 bg-[#0f2f7f]/5 text-[#0f2f7f] transition hover:bg-[#0f2f7f]/10"
+          aria-label="Profile"
+        >
+          <span class="material-symbols-outlined">person</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="mx-auto max-w-screen-2xl px-5 pb-16 pt-24 sm:px-8">
+    <router-outlet />
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white/70">
+    <div class="mx-auto flex max-w-screen-2xl flex-col gap-6 px-5 py-10 sm:px-8 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-sm font-black uppercase tracking-[0.14em] text-[#0f2f7f]">Atheneum</p>
+        <p class="mt-2 text-sm text-slate-500">Curated commerce for timeless pieces.</p>
+      </div>
+      <div class="flex flex-wrap gap-6 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+        <a class="transition hover:text-slate-900" href="#">Terms</a>
+        <a class="transition hover:text-slate-900" href="#">Privacy</a>
+        <a class="transition hover:text-slate-900" href="#">Support</a>
+      </div>
+    </div>
+  </footer>
+</div>

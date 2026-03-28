@@ -1,0 +1,65 @@
+<div class="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-8">
+  <aside class="h-fit rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.85)] lg:sticky lg:top-24">
+    <div class="rounded-2xl bg-[linear-gradient(135deg,#0f2f7f_0%,#2b4ea3_100%)] px-4 py-5 text-white">
+      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-blue-100">Account Space</p>
+      <h1 class="mt-2 text-2xl font-black tracking-tight">Profile Hub</h1>
+      <p class="mt-2 text-sm text-blue-100">Manage your personal account and activity.</p>
+    </div>
+
+    <nav class="mt-4 space-y-1.5">
+      <button
+        *ngFor="let item of tabs"
+        type="button"
+        (click)="setTab(item.key)"
+        class="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition"
+        [ngClass]="
+          tab() === item.key
+            ? ['bg-[#0f2f7f]', 'text-white']
+            : ['text-slate-600', 'hover:bg-slate-100']
+        "
+      >
+        <span class="material-symbols-outlined text-[20px]">{{ item.icon }}</span>
+        {{ item.label }}
+      </button>
+    </nav>
+
+    <button
+      type="button"
+      (click)="signOut()"
+      class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-rose-700 transition hover:bg-rose-100"
+    >
+      <span class="material-symbols-outlined text-[18px]">logout</span>
+      Sign Out
+    </button>
+  </aside>
+
+  <section class="space-y-5">
+    <div class="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Dashboard</p>
+        <h2 class="mt-2 text-3xl font-black tracking-tight text-slate-900">{{ activeTabLabel() }}</h2>
+      </div>
+      <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-slate-700">
+        <span class="material-symbols-outlined text-[16px] text-[#0f2f7f]">verified_user</span>
+        {{ roleLabel() }}
+      </div>
+    </div>
+
+    <app-profile-personal-section
+      *ngIf="tab() === 'personal'"
+      [user]="user()"
+      [loading]="loading()"
+      [roleLabel]="roleLabel()"
+    />
+
+    <app-profile-orders-section *ngIf="tab() === 'orders'" />
+
+    <app-profile-addresses-section *ngIf="tab() === 'addresses'" />
+
+    <app-profile-payments-section *ngIf="tab() === 'payments'" [user]="user()" />
+
+    <app-profile-wishlist-section *ngIf="tab() === 'wishlist'" />
+
+    <app-profile-reviews-section *ngIf="tab() === 'reviews'" />
+  </section>
+</div>

@@ -12,7 +12,7 @@ export class RedirectComponent implements OnInit {
   private auth = inject(AuthService);
 
   ngOnInit(): void {
-    const target = this.auth.hasToken() ? '/home' : '/auth';
+    const target = this.auth.hasToken() ? '/home' : '/signin';
     this.router.navigateByUrl(target, { replaceUrl: true });
   }
 }

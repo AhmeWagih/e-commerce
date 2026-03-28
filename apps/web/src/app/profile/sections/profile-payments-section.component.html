@@ -1,0 +1,24 @@
+<section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.85)] sm:p-8">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h3 class="text-xl font-black tracking-tight text-slate-900">Payment Methods</h3>
+      <p class="mt-1 text-sm text-slate-500">Your default and saved payment options.</p>
+    </div>
+    <button class="rounded-xl border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-slate-700" type="button">Manage</button>
+  </div>
+
+  <article class="mt-6 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#0f2f7f_0%,#3056b2_100%)] p-6 text-white shadow-lg">
+    <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-blue-100">Primary Card</p>
+    <p class="mt-5 text-xl font-black tracking-[0.22em]">•••• •••• •••• 7742</p>
+    <div class="mt-8 flex items-end justify-between">
+      <div>
+        <p class="text-[11px] uppercase tracking-[0.14em] text-blue-200">Card Holder</p>
+        <p class="mt-1 text-sm font-bold">{{ user.name || '—' }}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-[11px] uppercase tracking-[0.14em] text-blue-200">Expires</p>
+        <p class="mt-1 text-sm font-bold">09/27</p>
+      </div>
+    </div>
+  </article>
+</section>
