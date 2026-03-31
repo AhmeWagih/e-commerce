@@ -91,7 +91,12 @@ const sendEmailConfirmationUrl = async (user) => {
 
 // Signup
 exports.signUp = catchAsync(async (req, res, next) => {
-  const user = await User.create(req.body);
+  const body = { ...req.body };
+  delete body.accountStatus;
+  delete body.role;
+  body.accountStatus =
+    process.env.REQUIRE_USER_APPROVAL === 'true' ? 'pending' : 'active';
+  const user = await User.create(body);
 
   //create a cart for a new user
   await Cart.create({
@@ -172,6 +177,22 @@ exports.googleAuth = catchAsync(async (req, res, next) => {
 
   let user = await User.findOne({ email });
 
+  if (user) {
+    if (user.deletedAt) {
+      return next(new AppError('This account is no longer available.', 401));
+    }
+    if (user.accountStatus === 'restricted') {
+      return next(
+        new AppError('Your account has been restricted. Please contact support.', 403)
+      );
+    }
+    if (user.accountStatus === 'pending') {
+      return next(
+        new AppError('Your account is pending approval. Please contact support.', 403)
+      );
+    }
+  }
+
   if (!user) {
     const randomPassword = crypto.randomBytes(16).toString('hex');
 
@@ -183,7 +204,9 @@ exports.googleAuth = catchAsync(async (req, res, next) => {
       password: randomPassword,
       confirmPassword: randomPassword,
       emailConfirmed: true,
+      accountStatus: 'active',
     });
+    await Cart.create({ user: user._id });
   }
 
   user.password = undefined;
