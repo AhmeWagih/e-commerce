@@ -10,6 +10,13 @@ import { ProductDetailComponent } from './products/product-detail/product-detail
 import { CartComponent } from './cart/cart.component';
 import { CheckoutComponent } from './checkout/checkout.component';
 import { nonEmptyCartGuard } from './guards/non-empty-cart.guard';
+import { adminGuard } from './guards/admin.guard';
+import { AdminLayoutComponent } from './admin/admin-layout.component';
+import { AdminUsersComponent } from './admin/admin-users.component';
+import { AdminCategoriesComponent } from './admin/admin-categories.component';
+import { AdminOrdersComponent } from './admin/admin-orders.component';
+import { AdminPromosComponent } from './admin/admin-promos.component';
+import { AdminContentComponent } from './admin/admin-content.component';
 
 export const routes: Routes = [
   {
@@ -21,6 +28,19 @@ export const routes: Routes = [
     path: 'auth',
     redirectTo: 'signin',
     pathMatch: 'full',
+  },
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    canActivate: [adminGuard],
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'users' },
+      { path: 'users', component: AdminUsersComponent },
+      { path: 'categories', component: AdminCategoriesComponent },
+      { path: 'orders', component: AdminOrdersComponent },
+      { path: 'promos', component: AdminPromosComponent },
+      { path: 'content', component: AdminContentComponent },
+    ],
   },
   {
     path: '',
