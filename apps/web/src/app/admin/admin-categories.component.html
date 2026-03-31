@@ -1,0 +1,62 @@
+<div class="mx-auto max-w-3xl space-y-6">
+  <div>
+    <h2 class="text-2xl font-black tracking-tight text-slate-900">Categories</h2>
+    <p class="mt-1 text-sm text-slate-600">Organize the catalog. Products can reference these when editing inventory.</p>
+  </div>
+
+  @if (error(); as err) {
+    <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">{{ err }}</div>
+  }
+
+  <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h3 class="text-sm font-black uppercase tracking-[0.14em] text-slate-700">New category</h3>
+    <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <input
+        [(ngModel)]="name"
+        name="catName"
+        class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold"
+        placeholder="Name"
+      />
+      <input
+        [(ngModel)]="description"
+        name="catDesc"
+        class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold"
+        placeholder="Description (optional)"
+      />
+    </div>
+    <button
+      type="button"
+      (click)="create()"
+      class="mt-4 rounded-2xl bg-[#0f2f7f] px-5 py-2.5 text-sm font-black uppercase tracking-wide text-white"
+    >
+      Add category
+    </button>
+  </div>
+
+  @if (loading()) {
+    <p class="text-sm text-slate-500">Loading…</p>
+  } @else {
+    <ul class="divide-y divide-slate-200 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      @for (c of categories(); track c._id) {
+        <li class="flex items-center justify-between gap-4 px-5 py-4">
+          <div>
+            <p class="font-black text-slate-900">{{ c.name }}</p>
+            @if (c.description) {
+              <p class="text-xs text-slate-500">{{ c.description }}</p>
+            }
+          </div>
+          <button
+            type="button"
+            class="rounded-xl border border-rose-200 px-3 py-1.5 text-xs font-black uppercase text-rose-700 disabled:opacity-50"
+            [disabled]="deletingId() === c._id"
+            (click)="remove(c._id)"
+          >
+            Delete
+          </button>
+        </li>
+      } @empty {
+        <li class="px-5 py-10 text-center text-sm text-slate-500">No categories yet.</li>
+      }
+    </ul>
+  }
+</div>

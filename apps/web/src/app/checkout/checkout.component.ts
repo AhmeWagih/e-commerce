@@ -28,6 +28,12 @@ export class CheckoutComponent implements OnInit {
   cart = signal<HydratedCart | null>(null);
   totals$ = this.cartService.totals$;
 
+  promoInput = signal('');
+  promoDiscount = signal(0);
+  promoAppliedCode = signal<string | null>(null);
+  promoError = signal<string | null>(null);
+  promoLoading = signal(false);
+
   shippingForm = this.fb.group({
     address: ['', [Validators.required, Validators.minLength(6)]],
     city: ['', [Validators.required, Validators.minLength(2)]],
@@ -94,6 +100,35 @@ export class CheckoutComponent implements OnInit {
     if (s === 3) this.step.set(2);
   }
 
+  applyPromo() {
+    const cart = this.cart();
+    const code = this.promoInput().trim();
+    if (!cart?.items.length || !code) return;
+    const subtotal = cart.totalPrice ?? 0;
+    this.promoError.set(null);
+    this.promoLoading.set(true);
+    this.orderService.validatePromo(code, subtotal).subscribe({
+      next: (res) => {
+        this.promoLoading.set(false);
+        this.promoDiscount.set(res.data.discount);
+        this.promoAppliedCode.set(res.data.code);
+      },
+      error: (err) => {
+        this.promoLoading.set(false);
+        this.promoDiscount.set(0);
+        this.promoAppliedCode.set(null);
+        this.promoError.set(err.error?.message || 'Invalid promo code.');
+      },
+    });
+  }
+
+  clearPromo() {
+    this.promoDiscount.set(0);
+    this.promoAppliedCode.set(null);
+    this.promoError.set(null);
+    this.promoInput.set('');
+  }
+
   placeOrder() {
     const cart = this.cart();
     if (!cart || cart.items.length === 0) {
@@ -107,7 +142,8 @@ export class CheckoutComponent implements OnInit {
 
     const subtotal = cart.totalPrice ?? 0;
     const shipping = cart.items.length > 0 ? 50 : 0;
-    const total = subtotal + shipping;
+    const discount = this.promoDiscount();
+    const total = Math.max(0, subtotal - discount + shipping);
 
     this.placingOrder.set(true);
     this.orderService
@@ -118,6 +154,8 @@ export class CheckoutComponent implements OnInit {
           unitPrice: it.priceAfterDiscount,
         })),
         totalAmount: total,
+        shippingFee: shipping,
+        promoCode: this.promoAppliedCode() || undefined,
         shippingAddress: {
           address: this.shippingForm.controls.address.value!,
           city: this.shippingForm.controls.city.value!,

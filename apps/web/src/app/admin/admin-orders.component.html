@@ -1,0 +1,102 @@
+<div class="mx-auto max-w-6xl space-y-6">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 class="text-2xl font-black tracking-tight text-slate-900">Orders & shipping</h2>
+      <p class="mt-1 text-sm text-slate-600">Update fulfillment status, carriers, and tracking references.</p>
+    </div>
+    <select
+      class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event); load()"
+    >
+      <option value="">All statuses</option>
+      <option value="pending">Pending</option>
+      <option value="paid">Paid</option>
+      <option value="shipped">Shipped</option>
+      <option value="completed">Completed</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+  </div>
+
+  @if (error(); as err) {
+    <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">{{ err }}</div>
+  }
+
+  @if (loading()) {
+    <p class="text-sm text-slate-500">Loading orders…</p>
+  } @else {
+    <div class="space-y-4">
+      @for (row of orders(); track key(row)) {
+        @if (draft()[key(row)]; as d) {
+          <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p class="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Order</p>
+                <p class="font-mono text-sm font-bold text-slate-900">{{ row.order._id }}</p>
+                <p class="mt-1 text-sm font-semibold text-slate-700">{{ row.userName }} · {{ row.userEmail }}</p>
+                <p class="mt-2 text-sm text-slate-600">
+                  Total:
+                  <span class="font-black text-slate-900">{{ row.order.totalAmount | number : '1.0-2' }}</span>
+                  · Placed {{ row.order.createdAt | date : 'medium' }}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="rounded-2xl bg-[#0f2f7f] px-4 py-2 text-sm font-black uppercase tracking-wide text-white disabled:opacity-50"
+                [disabled]="savingKey() === key(row)"
+                (click)="save(row)"
+              >
+                Save
+              </button>
+            </div>
+            <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div>
+                <label class="text-xs font-black uppercase text-slate-600">Status</label>
+                <select
+                  class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold"
+                  [ngModel]="d.status"
+                  (ngModelChange)="patch(row, 'status', $event)"
+                >
+                  <option value="pending">pending</option>
+                  <option value="paid">paid</option>
+                  <option value="shipped">shipped</option>
+                  <option value="completed">completed</option>
+                  <option value="cancelled">cancelled</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs font-black uppercase text-slate-600">Carrier</label>
+                <input
+                  class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold"
+                  [ngModel]="d.carrier"
+                  (ngModelChange)="patch(row, 'carrier', $event)"
+                  placeholder="e.g. DHL"
+                />
+              </div>
+              <div class="md:col-span-2">
+                <label class="text-xs font-black uppercase text-slate-600">Tracking number</label>
+                <input
+                  class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold"
+                  [ngModel]="d.trackingNumber"
+                  (ngModelChange)="patch(row, 'trackingNumber', $event)"
+                  placeholder="Tracking reference"
+                />
+              </div>
+              <div class="md:col-span-2">
+                <label class="text-xs font-black uppercase text-slate-600">Internal notes</label>
+                <textarea
+                  class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold"
+                  rows="2"
+                  [ngModel]="d.shippingNotes"
+                  (ngModelChange)="patch(row, 'shippingNotes', $event)"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        }
+      } @empty {
+        <p class="rounded-3xl border border-slate-200 bg-white px-5 py-10 text-center text-sm text-slate-500">No orders.</p>
+      }
+    </div>
+  }
+</div>
