@@ -21,13 +21,23 @@
       </div>
 
       <div class="flex items-center gap-2 sm:gap-4">
-        <button
-          class="grid h-10 w-10 place-content-center rounded-full border border-slate-200 text-[#0f2f7f] transition hover:bg-slate-100"
-          type="button"
+        <a
+          routerLink="/cart"
+          routerLinkActive="ring-4 ring-[#0f2f7f]/10"
+          class="relative grid h-10 w-10 place-content-center rounded-full border border-slate-200 text-[#0f2f7f] transition hover:bg-slate-100"
           aria-label="Cart"
         >
           <span class="material-symbols-outlined">shopping_bag</span>
-        </button>
+          @if ((cartCount$ | async); as count) {
+            @if (count > 0) {
+              <span
+                class="absolute -right-1 -top-1 grid h-5 min-w-5 place-content-center rounded-full bg-[#0f2f7f] px-1 text-[10px] font-black text-white"
+              >
+                {{ count }}
+              </span>
+            }
+          }
+        </a>
         <a
           routerLink="/profile"
           class="grid h-10 w-10 place-content-center rounded-full border border-[#0f2f7f]/20 bg-[#0f2f7f]/5 text-[#0f2f7f] transition hover:bg-[#0f2f7f]/10"
