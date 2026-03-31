@@ -18,6 +18,14 @@
           class="text-slate-500 transition hover:text-slate-900"
           >Products</a
         >
+        @if (auth.isAdmin()) {
+          <a
+            routerLink="/admin"
+            routerLinkActive="text-[#0f2f7f]"
+            class="text-slate-500 transition hover:text-slate-900"
+            >Admin</a
+          >
+        }
       </div>
 
       <div class="flex items-center gap-2 sm:gap-4">

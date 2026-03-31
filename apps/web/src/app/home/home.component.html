@@ -6,23 +6,31 @@
       <div class="absolute inset-0 z-0">
         <img
           class="w-full h-full object-cover brightness-90"
-          alt="minimalist sculptural white ceramic artifact on a clean marble surface with soft shadows and architectural natural lighting"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDchIlDuzEHbgohC7gnnUixk0LPDsapvtiLEgKbsWO0WRVmcq088tZL9SAGJq1hq0WLJGlH9EwpHXnK60qZgG3X6fRSzawb6P_MNg9XRPcXA4vCD1YOcdrbITO-tdfNkUO225zyCPf1KdTtmBK71MGB5ZibEK2DcG7-JRMxHnIEnSeRBIjOQsD0lxh1COBxBCLSENyIjZLMRvMTC1H1v2Q94kt4xP1zY0x84KjMwuHi6GQjQ06FoAfeb6xM4S1f9Fwmjq9Awm2_mYTh"
+          [alt]="content()?.homepage?.heroTitle || 'Hero'"
+          [src]="
+            content()?.homepage?.heroImageUrl ||
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuDchIlDuzEHbgohC7gnnUixk0LPDsapvtiLEgKbsWO0WRVmcq088tZL9SAGJq1hq0WLJGlH9EwpHXnK60qZgG3X6fRSzawb6P_MNg9XRPcXA4vCD1YOcdrbITO-tdfNkUO225zyCPf1KdTtmBK71MGB5ZibEK2DcG7-JRMxHnIEnSeRBIjOQsD0lxh1COBxBCLSENyIjZLMRvMTC1H1v2Q94kt4xP1zY0x84KjMwuHi6GQjQ06FoAfeb6xM4S1f9Fwmjq9Awm2_mYTh'
+          "
         />
         <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(15,47,127,0.35)_0%,rgba(43,78,163,0.25)_50%,rgba(15,47,127,0.15)_100%)]"></div>
       </div>
       <div class="relative z-10 max-w-3xl">
         <div class="mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 backdrop-blur-md border border-white/20">
           <span class="inline-block h-2 w-2 rounded-full bg-[#0f2f7f]"></span>
-          <span class="text-xs font-bold uppercase tracking-[0.18em] text-white">Exhibition 01 • Silent Luxury</span>
+          <span class="text-xs font-bold uppercase tracking-[0.18em] text-white">{{
+            content()?.homepage?.heroBadge || 'Exhibition 01 • Silent Luxury'
+          }}</span>
         </div>
         <h1
           class="font-headline text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-[-0.02em] text-white leading-[0.95]"
         >
-          The Home of <br /><span class="text-blue-300 italic font-light">Silent Luxury</span>.
+          {{ content()?.homepage?.heroTitle || 'The Home of Silent Luxury.' }}
         </h1>
         <p class="mt-6 text-lg sm:text-xl text-white/90 max-w-2xl font-light leading-relaxed">
-          A curated archive of functional artifacts and sensory experiences. Where provenance meets timeless aesthetic.
+          {{
+            content()?.homepage?.heroSubtitle ||
+              'A curated archive of functional artifacts and sensory experiences. Where provenance meets timeless aesthetic.'
+          }}
         </p>
         <div class="mt-10 flex flex-col sm:flex-row gap-4">
           <button
@@ -48,20 +56,69 @@
     <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
       <div class="max-w-2xl">
         <h2 class="font-headline text-4xl sm:text-5xl md:text-6xl font-black tracking-[-0.01em] text-slate-900 mb-4">
-          Curated Collections
+          {{ content()?.homepage?.collectionsHeading || 'Curated Collections' }}
         </h2>
         <p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
-          Expertly sourced and categorized by heritage, craftsmanship, and cultural resonance. Discover collections that define contemporary luxury living.
+          {{
+            content()?.homepage?.collectionsSubheading ||
+              'Expertly sourced and categorized by heritage, craftsmanship, and cultural resonance. Discover collections that define contemporary luxury living.'
+          }}
         </p>
       </div>
-      <button
+      <a
+        routerLink="/products"
         class="group inline-flex items-center gap-2 text-[#0f2f7f] font-bold uppercase tracking-[0.12em] text-sm hover:gap-4 transition-all"
-        type="button"
       >
         View All
         <span class="material-symbols-outlined group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
-      </button>
+      </a>
     </div>
+
+    @if (activeBanners().length) {
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-12 md:gap-6">
+        @for (b of activeBanners(); track $index) {
+          @if (b.linkUrl?.startsWith('http')) {
+            <a
+              [href]="b.linkUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group relative md:col-span-6 h-72 overflow-hidden rounded-[1.75rem] cursor-pointer"
+            >
+              @if (b.imageUrl) {
+                <img [src]="b.imageUrl" [alt]="b.title || ''" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              }
+              <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.6)_0%,rgba(0,0,0,0.3)_40%,transparent_100%)] opacity-70 group-hover:opacity-85 transition-opacity"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                @if (b.title) {
+                  <h3 class="text-2xl font-headline font-black tracking-tight">{{ b.title }}</h3>
+                }
+                @if (b.subtitle) {
+                  <p class="mt-2 text-sm text-white/85">{{ b.subtitle }}</p>
+                }
+              </div>
+            </a>
+          } @else {
+            <a
+              [routerLink]="b.linkUrl || '/products'"
+              class="group relative md:col-span-6 h-72 overflow-hidden rounded-[1.75rem] cursor-pointer"
+            >
+              @if (b.imageUrl) {
+                <img [src]="b.imageUrl" [alt]="b.title || ''" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              }
+              <div class="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.6)_0%,rgba(0,0,0,0.3)_40%,transparent_100%)] opacity-70 group-hover:opacity-85 transition-opacity"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                @if (b.title) {
+                  <h3 class="text-2xl font-headline font-black tracking-tight">{{ b.title }}</h3>
+                }
+                @if (b.subtitle) {
+                  <p class="mt-2 text-sm text-white/85">{{ b.subtitle }}</p>
+                }
+              </div>
+            </a>
+          }
+        }
+      </div>
+    }
 
     <!-- Grid -->
     <div class="grid grid-cols-1 gap-5 md:grid-cols-12 md:gap-6">
