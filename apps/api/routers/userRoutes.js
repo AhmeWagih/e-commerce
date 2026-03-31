@@ -54,8 +54,8 @@ router
 
 router
   .route('/:id')
-  .get(userController.getUser)
-  .patch(userController.updateUser)
-  .delete(userController.deleteUser);
+  .get(restrictTo('admin'), userController.getUser)
+  .patch(restrictTo('admin'), userController.updateUser)
+  .delete(restrictTo('admin'), userController.deleteUser);
 
 module.exports = router;
