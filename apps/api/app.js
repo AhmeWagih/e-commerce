@@ -9,7 +9,16 @@ const categoryRouter = require('./routers/categoryRoutes');
 const orderRouter = require('./routers/orderRoutes');
 const paymentRouter = require('./routers/paymentRoutes');
 
+const paymentController = require('./controllers/paymentController');
+
 const app = express();
+
+app.post(
+  '/api/v1/payments/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  paymentController.webhookCheckout
+);
+
 app.use(express.json());
 
 // Serve uploaded images as static files
