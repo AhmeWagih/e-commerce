@@ -7,6 +7,10 @@ import { SignupComponent } from './signup/signup.component';
 import { BaseLayoutComponent } from './layout/base-layout.component';
 import { ProductsComponent } from './products/products.component';
 import { ProductDetailComponent } from './products/product-detail/product-detail.component';
+import { CartComponent } from './cart/cart.component';
+import { CheckoutComponent } from './checkout/checkout.component';
+import { OrdersPageComponent } from './orders/orders.page';
+import { nonEmptyCartGuard } from './guards/non-empty-cart.guard';
 
 export const routes: Routes = [
   {
@@ -40,12 +44,25 @@ export const routes: Routes = [
         component: ProfileComponent,
       },
       {
+        path: 'orders',
+        component: OrdersPageComponent,
+      },
+      {
         path: 'products',
         component: ProductsComponent,
       },
       {
         path: 'products/:productId',
         component: ProductDetailComponent,
+      },
+      {
+        path: 'cart',
+        component: CartComponent,
+      },
+      {
+        path: 'checkout',
+        component: CheckoutComponent,
+        canActivate: [nonEmptyCartGuard],
       },
     ],
   },

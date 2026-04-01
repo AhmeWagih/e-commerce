@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ProductService } from '../../services/product.service';
-import type { Product } from '../product.types';
+import type { Product, CreateProductResponse, UpdateProductResponse } from '../product.types';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -160,7 +161,30 @@ export class ProductFormComponent implements OnInit {
       error: (err: any) => {
         this.loading.set(false);
         this.error.set(err.error?.message || `Failed to ${p ? 'update' : 'create'} product.`);
+      }})
+      
+    const onError = (err: HttpErrorResponse, action: 'update' | 'create') => {
+      this.loading.set(false);
+      this.error.set(err.error?.message || `Failed to ${action} product.`);
+    };
+
+    if (p) {
+      this.productService.updateProduct(p._id, fd).subscribe({
+        next: (res: UpdateProductResponse) => {
+          this.loading.set(false);
+          this.saved.emit(res.data.updatedProduct);
+        },
+        error: (err: HttpErrorResponse) => onError(err, 'update'),
+      });
+      return;
+    }
+
+    this.productService.createProduct(fd).subscribe({
+      next: (res: CreateProductResponse) => {
+        this.loading.set(false);
+        this.saved.emit(res.data.newProduct);
       },
+      error: (err: HttpErrorResponse) => onError(err, 'create'),
     });
   }
 

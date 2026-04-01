@@ -1,3 +1,4 @@
+<app-toast />
 <div class="min-h-screen bg-[radial-gradient(circle_at_top_left,#f3f7ff_0%,#fdfdfd_42%,#f8fafc_100%)] text-slate-900">
   <header class="fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
     <nav class="mx-auto flex h-18 max-w-screen-2xl items-center justify-between px-5 sm:px-8">
@@ -19,21 +20,31 @@
           >Products</a
         >
         <a
-          routerLink="/profile"
+          routerLink="/orders"
           routerLinkActive="text-[#0f2f7f]"
           class="text-slate-500 transition hover:text-slate-900"
-          >Profile</a
+          >Orders</a
         >
       </div>
 
       <div class="flex items-center gap-2 sm:gap-4">
-        <button
-          class="grid h-10 w-10 place-content-center rounded-full border border-slate-200 text-[#0f2f7f] transition hover:bg-slate-100"
-          type="button"
+        <a
+          routerLink="/cart"
+          routerLinkActive="ring-4 ring-[#0f2f7f]/10"
+          class="relative grid h-10 w-10 place-content-center rounded-full border border-slate-200 text-[#0f2f7f] transition hover:bg-slate-100"
           aria-label="Cart"
         >
           <span class="material-symbols-outlined">shopping_bag</span>
-        </button>
+          @if ((cartCount$ | async); as count) {
+            @if (count > 0) {
+              <span
+                class="absolute -right-1 -top-1 grid h-5 min-w-5 place-content-center rounded-full bg-[#0f2f7f] px-1 text-[10px] font-black text-white"
+              >
+                {{ count }}
+              </span>
+            }
+          }
+        </a>
         <a
           routerLink="/profile"
           class="grid h-10 w-10 place-content-center rounded-full border border-[#0f2f7f]/20 bg-[#0f2f7f]/5 text-[#0f2f7f] transition hover:bg-[#0f2f7f]/10"

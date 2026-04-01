@@ -1,4 +1,5 @@
 const User = require('../models/userModel');
+const Order = require('../models/orderModel');
 
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
@@ -183,10 +184,12 @@ exports.removeFromWishlist = catchAsync(async (req, res, next) => {
 exports.getMyOrders = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user._id);
 
+  const orders = await Order.find({ user: req.user._id });
+
   res.status(200).json({
     status: 'success',
     data: {
-      orders: user.orders,
+      orders
     },
   });
 });

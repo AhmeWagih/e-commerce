@@ -1,0 +1,315 @@
+<section class="mx-auto w-full max-w-screen-2xl">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Checkout</h1>
+      <p class="mt-1 text-sm text-slate-500">Complete shipping, payment, and review your order.</p>
+    </div>
+  </div>
+
+  <div class="mt-8 rounded-3xl border border-slate-200 bg-white/80 p-4 sm:p-6">
+    <div class="flex items-center gap-3 sm:gap-5">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div
+          class="grid h-9 w-9 place-content-center rounded-2xl text-sm font-black"
+          [ngClass]="step() >= 1 ? 'bg-[#0f2f7f] text-white' : 'bg-slate-100 text-slate-700'"
+        >
+          1
+        </div>
+        <div class="hidden sm:block">
+          <p
+            class="text-xs font-black uppercase tracking-[0.16em]"
+            [ngClass]="step() >= 1 ? 'text-[#0f2f7f]' : 'text-slate-500'"
+          >
+            Shipping
+          </p>
+          <p class="text-xs text-slate-500">Address details</p>
+        </div>
+      </div>
+
+      <div class="h-px flex-1 bg-slate-200"></div>
+
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div
+          class="grid h-9 w-9 place-content-center rounded-2xl text-sm font-black"
+          [ngClass]="step() >= 2 ? 'bg-[#0f2f7f] text-white' : 'bg-slate-100 text-slate-700'"
+        >
+          2
+        </div>
+        <div class="hidden sm:block">
+          <p
+            class="text-xs font-black uppercase tracking-[0.16em]"
+            [ngClass]="step() >= 2 ? 'text-[#0f2f7f]' : 'text-slate-500'"
+          >
+            Payment
+          </p>
+          <p class="text-xs text-slate-500">Choose a method</p>
+        </div>
+      </div>
+
+      <div class="h-px flex-1 bg-slate-200"></div>
+
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div
+          class="grid h-9 w-9 place-content-center rounded-2xl text-sm font-black"
+          [ngClass]="step() >= 3 ? 'bg-[#0f2f7f] text-white' : 'bg-slate-100 text-slate-700'"
+        >
+          3
+        </div>
+        <div class="hidden sm:block">
+          <p
+            class="text-xs font-black uppercase tracking-[0.16em]"
+            [ngClass]="step() >= 3 ? 'text-[#0f2f7f]' : 'text-slate-500'"
+          >
+            Review
+          </p>
+          <p class="text-xs text-slate-500">Confirm & place order</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/80 px-4 py-3">
+      <span class="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-[#0f2f7f]"></span>
+      <p class="text-sm font-semibold text-slate-700">Loading checkout…</p>
+    </div>
+  }
+
+  @if (orderError(); as oe) {
+    <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3">
+      <p class="text-sm font-semibold text-rose-800">{{ oe }}</p>
+    </div>
+  }
+
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div class="lg:col-span-2">
+      @if (step() === 1) {
+        <div class="rounded-3xl border border-slate-200 bg-white/80 p-5 sm:p-6">
+          <h2 class="text-lg font-black tracking-tight text-slate-900">Shipping</h2>
+          <p class="mt-1 text-sm text-slate-500">Where should we deliver your order?</p>
+
+          <form class="mt-6 space-y-4" [formGroup]="shippingForm">
+            <div>
+              <label class="text-xs font-black uppercase tracking-[0.16em] text-slate-600">Address</label>
+              <input
+                type="text"
+                formControlName="address"
+                class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#0f2f7f]/40 focus:ring-4 focus:ring-[#0f2f7f]/10"
+                placeholder="Street, building, apartment…"
+              />
+              @if (shippingForm.controls.address.touched && shippingForm.controls.address.invalid) {
+                <p class="mt-2 text-xs font-semibold text-rose-600">Please enter a valid address.</p>
+              }
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label class="text-xs font-black uppercase tracking-[0.16em] text-slate-600">City</label>
+                <input
+                  type="text"
+                  formControlName="city"
+                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#0f2f7f]/40 focus:ring-4 focus:ring-[#0f2f7f]/10"
+                  placeholder="Cairo"
+                />
+                @if (shippingForm.controls.city.touched && shippingForm.controls.city.invalid) {
+                  <p class="mt-2 text-xs font-semibold text-rose-600">City is required.</p>
+                }
+              </div>
+
+              <div>
+                <label class="text-xs font-black uppercase tracking-[0.16em] text-slate-600">Zip Code</label>
+                <input
+                  type="text"
+                  formControlName="zipCode"
+                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#0f2f7f]/40 focus:ring-4 focus:ring-[#0f2f7f]/10"
+                  placeholder="12345"
+                />
+                @if (shippingForm.controls.zipCode.touched && shippingForm.controls.zipCode.invalid) {
+                  <p class="mt-2 text-xs font-semibold text-rose-600">Zip code is required.</p>
+                }
+              </div>
+            </div>
+          </form>
+        </div>
+      }
+
+      @if (step() === 2) {
+        <div class="rounded-3xl border border-slate-200 bg-white/80 p-5 sm:p-6">
+          <h2 class="text-lg font-black tracking-tight text-slate-900">Payment</h2>
+          <p class="mt-1 text-sm text-slate-500">Choose how you want to pay.</p>
+
+          <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <button
+              type="button"
+              (click)="selectPayment('credit')"
+              class="group relative overflow-hidden rounded-3xl border bg-white p-5 text-left transition hover:bg-slate-50"
+              [class.border-[#0f2f7f]/40]="paymentForm.controls.method.value === 'credit'"
+              [class.border-slate-200]="paymentForm.controls.method.value !== 'credit'"
+            >
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p class="text-sm font-black text-slate-900">Credit Card</p>
+                  <p class="mt-1 text-xs font-semibold text-slate-500">Pay securely with your card.</p>
+                </div>
+                <span class="material-symbols-outlined text-[#0f2f7f]">credit_card</span>
+              </div>
+              <div
+                class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100"
+                style="background: radial-gradient(circle at top left, rgba(15,47,127,0.10), transparent 55%)"
+              ></div>
+            </button>
+
+            <button
+              type="button"
+              (click)="selectPayment('cod')"
+              class="group relative overflow-hidden rounded-3xl border bg-white p-5 text-left transition hover:bg-slate-50"
+              [class.border-[#0f2f7f]/40]="paymentForm.controls.method.value === 'cod'"
+              [class.border-slate-200]="paymentForm.controls.method.value !== 'cod'"
+            >
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p class="text-sm font-black text-slate-900">Cash on Delivery</p>
+                  <p class="mt-1 text-xs font-semibold text-slate-500">Pay when your order arrives.</p>
+                </div>
+                <span class="material-symbols-outlined text-[#0f2f7f]">payments</span>
+              </div>
+              <div
+                class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100"
+                style="background: radial-gradient(circle at top left, rgba(15,47,127,0.10), transparent 55%)"
+              ></div>
+            </button>
+          </div>
+
+          @if (isCredit()) {
+            <form class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2" [formGroup]="paymentForm">
+              <div class="sm:col-span-2">
+                <label class="text-xs font-black uppercase tracking-[0.16em] text-slate-600">Card number</label>
+                <input
+                  type="text"
+                  formControlName="cardNumber"
+                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#0f2f7f]/40 focus:ring-4 focus:ring-[#0f2f7f]/10"
+                  placeholder="1234 5678 9012 3456"
+                />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="text-xs font-black uppercase tracking-[0.16em] text-slate-600">Name on card</label>
+                <input
+                  type="text"
+                  formControlName="cardName"
+                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#0f2f7f]/40 focus:ring-4 focus:ring-[#0f2f7f]/10"
+                  placeholder="Ayman Khaled"
+                />
+              </div>
+
+              <div>
+                <label class="text-xs font-black uppercase tracking-[0.16em] text-slate-600">Expiry</label>
+                <input
+                  type="text"
+                  formControlName="expiry"
+                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#0f2f7f]/40 focus:ring-4 focus:ring-[#0f2f7f]/10"
+                  placeholder="MM/YY"
+                />
+              </div>
+
+              <div>
+                <label class="text-xs font-black uppercase tracking-[0.16em] text-slate-600">CVV</label>
+                <input
+                  type="password"
+                  formControlName="cvv"
+                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#0f2f7f]/40 focus:ring-4 focus:ring-[#0f2f7f]/10"
+                  placeholder="123"
+                />
+              </div>
+            </form>
+          }
+        </div>
+      }
+
+      @if (step() === 3) {
+        <div class="rounded-3xl border border-slate-200 bg-white/80 p-5 sm:p-6">
+          <h2 class="text-lg font-black tracking-tight text-slate-900">Review</h2>
+          <p class="mt-1 text-sm text-slate-500">Confirm your details before placing the order.</p>
+
+          @if (cart(); as c) {
+            <div class="mt-6 space-y-3">
+              @for (it of c.items; track it._id) {
+                <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-black text-slate-900">{{ it.productDetails?.title ?? 'Product' }}</p>
+                    <p class="mt-1 text-xs font-semibold text-slate-500">Qty: {{ it.quantity }}</p>
+                  </div>
+                  <p class="text-sm font-black text-slate-900">{{ it.itemTotalPrice ?? 0 | number : '1.0-0' }}</p>
+                </div>
+              }
+            </div>
+
+            <div class="mt-6 rounded-3xl border border-slate-200 bg-white p-5">
+              <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-600">Shipping to</p>
+              <p class="mt-2 text-sm font-semibold text-slate-900">
+                {{ shippingForm.controls.address.value }}, {{ shippingForm.controls.city.value }} ({{ shippingForm.controls.zipCode.value }})
+              </p>
+              <p class="mt-4 text-xs font-black uppercase tracking-[0.16em] text-slate-600">Payment</p>
+              <p class="mt-2 text-sm font-semibold text-slate-900">
+                @if (paymentForm.controls.method.value === 'credit') { Credit Card } @else { Cash on Delivery }
+              </p>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <button
+          type="button"
+          (click)="back()"
+          [disabled]="step() === 1 || placingOrder()"
+          class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black tracking-wide text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Back
+        </button>
+
+        <button
+          type="button"
+          (click)="next()"
+          [disabled]="placingOrder()"
+          class="inline-flex items-center justify-center gap-3 rounded-2xl bg-[#0f2f7f] px-5 py-3 text-sm font-black tracking-wide text-white shadow-lg shadow-[#0f2f7f]/20 transition hover:bg-[#0b2566] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          @if (placingOrder()) {
+            <span class="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+            Processing…
+          } @else {
+            Continue
+          }
+        </button>
+      </div>
+    </div>
+
+    <aside class="lg:col-span-1">
+      <div class="sticky top-24 rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm">
+        <h2 class="text-lg font-black tracking-tight text-slate-900">Summary</h2>
+        @if ((totals$ | async); as t) {
+          <div class="mt-5 space-y-3">
+            <div class="flex items-center justify-between text-sm">
+              <span class="font-semibold text-slate-500">Subtotal</span>
+              <span class="font-black text-slate-900">{{ t.subtotal | number : '1.0-0' }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="font-semibold text-slate-500">Shipping</span>
+              <span class="font-black text-slate-900">
+                @if (t.shipping === 0) { <span class="text-emerald-600">Free</span> } @else {
+                  {{ t.shipping | number : '1.0-0' }}
+                }
+              </span>
+            </div>
+            <div class="h-px w-full bg-slate-200"></div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-black tracking-wide text-slate-700">Total</span>
+              <span class="text-xl font-black tracking-tight text-slate-900">{{ t.total | number : '1.0-0' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </aside>
+  </div>
+</section>
+

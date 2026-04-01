@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { AuthService } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 import { ProductFormComponent } from '../product-form/product-form.component';
 import type { Product } from '../product.types';
 import { environment } from '../../../environments/environment';
@@ -16,12 +17,14 @@ export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private productService = inject(ProductService);
+  private cartService = inject(CartService);
   auth = inject(AuthService);
 
   product = signal<Product | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
   selectedImage = signal<string | null>(null);
+  addingToCart = signal(false);
 
   deleting = signal(false);
   confirmDelete = signal(false);
@@ -94,6 +97,21 @@ export class ProductDetailComponent implements OnInit {
     } catch {
       return `${currency} ${price.toFixed(2)}`;
     }
+  }
+
+  addToCart() {
+    const p = this.product();
+    if (!p) return;
+    this.addingToCart.set(true);
+    this.cartService.addItem({ product: p._id, quantity: 1 }).subscribe({
+      next: () => {
+        this.addingToCart.set(false);
+        this.router.navigateByUrl('/cart');
+      },
+      error: () => {
+        this.addingToCart.set(false);
+      },
+    });
   }
 
   get allImages(): string[] {
