@@ -19,6 +19,13 @@
           class="text-slate-500 transition hover:text-slate-900"
           >Products</a
         >
+        <a
+          routerLink="/orders"
+          routerLinkActive="text-[#0f2f7f]"
+          class="text-slate-500 transition hover:text-slate-900"
+          >Orders</a
+        >
+
         @if (auth.isAdmin()) {
           <a
             routerLink="/admin"
