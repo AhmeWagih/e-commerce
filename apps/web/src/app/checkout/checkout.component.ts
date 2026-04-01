@@ -33,6 +33,12 @@ export class CheckoutComponent implements OnInit {
   cart = signal<HydratedCart | null>(null);
   totals$ = this.cartService.totals$;
 
+  promoInput = signal('');
+  promoDiscount = signal(0);
+  promoAppliedCode = signal<string | null>(null);
+  promoError = signal<string | null>(null);
+  promoLoading = signal(false);
+
   shippingForm = this.fb.group({
     address: ['', [Validators.required, Validators.minLength(6)]],
     city: ['', [Validators.required, Validators.minLength(2)]],

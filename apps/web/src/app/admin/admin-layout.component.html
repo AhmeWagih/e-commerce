@@ -1,0 +1,64 @@
+<div class="min-h-screen bg-slate-50 text-slate-900">
+  <div class="flex min-h-screen">
+    <aside class="hidden w-64 shrink-0 border-r border-slate-200 bg-white/95 px-4 py-8 lg:block">
+      <p class="px-2 text-xs font-black uppercase tracking-[0.2em] text-[#0f2f7f]">Admin</p>
+      <nav class="mt-8 space-y-1 text-[13px] font-semibold uppercase tracking-[0.12em]">
+        <a
+          routerLink="/admin/users"
+          routerLinkActive="bg-[#0f2f7f]/10 text-[#0f2f7f]"
+          class="block rounded-xl px-3 py-2.5 text-slate-600 transition hover:bg-slate-100"
+          >Users</a
+        >
+        <a
+          routerLink="/admin/categories"
+          routerLinkActive="bg-[#0f2f7f]/10 text-[#0f2f7f]"
+          class="block rounded-xl px-3 py-2.5 text-slate-600 transition hover:bg-slate-100"
+          >Categories</a
+        >
+        <a
+          routerLink="/products"
+          routerLinkActive="bg-[#0f2f7f]/10 text-[#0f2f7f]"
+          class="block rounded-xl px-3 py-2.5 text-slate-600 transition hover:bg-slate-100"
+          >Products</a
+        >
+        <a
+          routerLink="/admin/orders"
+          routerLinkActive="bg-[#0f2f7f]/10 text-[#0f2f7f]"
+          class="block rounded-xl px-3 py-2.5 text-slate-600 transition hover:bg-slate-100"
+          >Orders</a
+        >
+        <a
+          routerLink="/admin/promos"
+          routerLinkActive="bg-[#0f2f7f]/10 text-[#0f2f7f]"
+          class="block rounded-xl px-3 py-2.5 text-slate-600 transition hover:bg-slate-100"
+          >Promo codes</a
+        >
+        <a
+          routerLink="/admin/content"
+          routerLinkActive="bg-[#0f2f7f]/10 text-[#0f2f7f]"
+          class="block rounded-xl px-3 py-2.5 text-slate-600 transition hover:bg-slate-100"
+          >Homepage</a
+        >
+      </nav>
+      <div class="mt-10 border-t border-slate-200 pt-6">
+        <a
+          routerLink="/home"
+          class="block rounded-xl px-3 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-slate-500 transition hover:bg-slate-100"
+          >← Storefront</a
+        >
+      </div>
+    </aside>
+
+    <div class="flex min-w-0 flex-1 flex-col">
+      <header
+        class="flex items-center justify-between gap-4 border-b border-slate-200 bg-white/90 px-4 py-4 backdrop-blur sm:px-8"
+      >
+        <h1 class="text-lg font-black tracking-tight text-slate-900 sm:text-xl">Control room</h1>
+        <span class="text-xs font-semibold text-slate-500">{{ auth.currentUser()?.email }}</span>
+      </header>
+      <main class="flex-1 px-4 py-8 sm:px-8">
+        <router-outlet />
+      </main>
+    </div>
+  </div>
+</div>

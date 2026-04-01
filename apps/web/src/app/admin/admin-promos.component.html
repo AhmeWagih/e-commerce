@@ -1,0 +1,96 @@
+<div class="mx-auto max-w-5xl space-y-8">
+  <div>
+    <h2 class="text-2xl font-black tracking-tight text-slate-900">Promo codes</h2>
+    <p class="mt-1 text-sm text-slate-600">Percentage or fixed discounts with optional limits and expiry.</p>
+  </div>
+
+  @if (error(); as err) {
+    <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">{{ err }}</div>
+  }
+
+  <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h3 class="text-sm font-black uppercase tracking-[0.14em] text-slate-700">Create</h3>
+    <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+      <input [(ngModel)]="form.code" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold uppercase" placeholder="CODE" name="pcode" />
+      <input [(ngModel)]="form.description" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold" placeholder="Description" name="pdesc" />
+      <select [(ngModel)]="form.discountType" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold" name="ptype">
+        <option value="percent">Percent</option>
+        <option value="fixed">Fixed amount</option>
+      </select>
+      <input type="number" [(ngModel)]="form.discountValue" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold" name="pval" />
+      <input type="number" [(ngModel)]="form.minOrderAmount" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold" placeholder="Min order" name="pmin" />
+      <input type="number" [(ngModel)]="form.maxUses" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold" placeholder="Max uses (blank = ∞)" name="pmax" />
+      <input type="datetime-local" [(ngModel)]="form.expiresAt" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm font-semibold" name="pexp" />
+      <label class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+        <input type="checkbox" [(ngModel)]="form.active" name="pactive" />
+        Active
+      </label>
+    </div>
+    <button
+      type="button"
+      (click)="create()"
+      class="mt-4 rounded-2xl bg-[#0f2f7f] px-5 py-2.5 text-sm font-black uppercase tracking-wide text-white"
+    >
+      Save promo
+    </button>
+  </div>
+
+  @if (loading()) {
+    <p class="text-sm text-slate-500">Loading…</p>
+  } @else {
+    <div class="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+        <thead class="bg-slate-50 text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+          <tr>
+            <th class="px-4 py-3">Code</th>
+            <th class="px-4 py-3">Type</th>
+            <th class="px-4 py-3">Uses</th>
+            <th class="px-4 py-3">Active</th>
+            <th class="px-4 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (p of promos(); track p._id) {
+            <tr>
+              <td class="px-4 py-3 font-black">{{ p.code }}</td>
+              <td class="px-4 py-3 text-slate-600">
+                {{ p.discountType }} · {{ p.discountValue }}
+              </td>
+              <td class="px-4 py-3 text-slate-600">
+                {{ p.usedCount }}
+                @if (p.maxUses != null) {
+                  / {{ p.maxUses }}
+                }
+              </td>
+              <td class="px-4 py-3">
+                {{ p.active ? 'Yes' : 'No' }}
+              </td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  type="button"
+                  class="mr-2 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-black uppercase disabled:opacity-50"
+                  [disabled]="busyId() === p._id"
+                  (click)="toggleActive(p)"
+                >
+                  Toggle
+                </button>
+                <button
+                  type="button"
+                  class="rounded-xl bg-rose-600 px-3 py-1.5 text-xs font-black uppercase text-white disabled:opacity-50"
+                  [disabled]="busyId() === p._id"
+                  (click)="remove(p)"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="px-4 py-10 text-center text-slate-500">No promo codes yet.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

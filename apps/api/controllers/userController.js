@@ -1,11 +1,17 @@
 const User = require('../models/userModel');
+const Product = require('../models/productModel');
+const PromoCode = require('../models/promoCodeModel');
 const Order = require('../models/orderModel');
 
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find({ active: { $ne: false } });
+  const filter = { deletedAt: null };
+  if (!req.query.includeInactive) {
+    filter.active = { $ne: false };
+  }
+  const users = await User.find(filter);
 
   res.status(200).json({
     status: 'success',
@@ -72,11 +78,24 @@ exports.updateUser = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteUser = catchAsync(async (req, res, next) => {
-  await User.findByIdAndDelete(req.params.id);
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(new AppError('Not found user with this id', 400));
+  }
+
+  if (user.role === 'admin') {
+    return next(new AppError('Cannot delete an admin account', 400));
+  }
+
+  user.deletedAt = new Date();
+  user.active = false;
+  user.refreshToken = undefined;
+  await user.save({ validateBeforeSave: false });
 
   res.status(204).json({
     status: 'success',
-    message: 'User was deleted!',
+    message: 'User was deactivated',
   });
 });
 
@@ -195,26 +214,96 @@ exports.getMyOrders = catchAsync(async (req, res, next) => {
 });
 
 exports.createOrder = catchAsync(async (req, res, next) => {
-  const { items, totalAmount, status } = req.body;
+  const { items, shippingAddress, paymentMethod, promoCode, shippingFee } = req.body;
 
   if (!items || !Array.isArray(items) || items.length === 0) {
     return next(new AppError('Order items are required', 400));
   }
 
+  let subtotal = 0;
+  const normalizedItems = [];
+
+  for (const it of items) {
+    const pid = it.productId || it.product;
+    const product = await Product.findById(pid);
+    if (!product) {
+      return next(new AppError(`Product not found: ${pid}`, 400));
+    }
+    const qty = it.quantity || 1;
+    if (qty > product.quantity) {
+      return next(new AppError(`Not enough stock for ${product.title}`, 400));
+    }
+    const unitPrice = product.price - (product.price * product.discount) / 100;
+    subtotal += unitPrice * qty;
+    normalizedItems.push({
+      productId: product._id,
+      sellerId: product.seller ? product.seller._id || product.seller : undefined,
+      quantity: qty,
+      unitPrice,
+      sellerStatus: 'pending',
+    });
+  }
+
+  let promoDiscount = 0;
+  let appliedCode;
+
+  if (promoCode) {
+    const promo = await PromoCode.findOne({ code: String(promoCode).toUpperCase() });
+    if (!promo || !promo.active) {
+      return next(new AppError('Invalid promo code', 400));
+    }
+    if (promo.expiresAt && promo.expiresAt.getTime() < Date.now()) {
+      return next(new AppError('Promo code has expired', 400));
+    }
+    if (promo.maxUses != null && promo.usedCount >= promo.maxUses) {
+      return next(new AppError('Promo code usage limit reached', 400));
+    }
+    if (subtotal < promo.minOrderAmount) {
+      return next(new AppError('Order does not meet minimum for this promo', 400));
+    }
+    promoDiscount = promo.computeDiscount(subtotal);
+    appliedCode = promo.code;
+    await PromoCode.findByIdAndUpdate(promo._id, { $inc: { usedCount: 1 } });
+  }
+
+  const ship = Number(shippingFee);
+  const shipping = Number.isFinite(ship) && ship >= 0 ? ship : 50;
+  const totalAmount = Math.max(0, subtotal - promoDiscount + shipping);
+
   const user = await User.findById(req.user._id);
 
   user.orders.push({
-    items,
-    totalAmount: totalAmount || 0,
-    status: status || 'pending',
+    items: normalizedItems,
+    totalAmount,
+    subtotalBeforePromo: subtotal,
+    promoCode: appliedCode,
+    promoDiscount,
+    shippingAddress,
+    paymentMethod,
+    status: 'pending',
   });
 
   await user.save();
+
+  const sellerRevenueMap = new Map();
+  normalizedItems.forEach((item) => {
+    if (!item.sellerId) return;
+    const key = item.sellerId.toString();
+    const amount = Number(item.unitPrice) * Number(item.quantity);
+    sellerRevenueMap.set(key, Number(sellerRevenueMap.get(key) || 0) + amount);
+  });
+
+  for (const [sellerId, amount] of sellerRevenueMap.entries()) {
+    await User.findByIdAndUpdate(sellerId, {
+      $inc: { 'sellerWallet.pendingBalance': amount },
+    });
+  }
 
   res.status(201).json({
     status: 'success',
     data: {
       orders: user.orders,
+      lastOrder: user.orders[user.orders.length - 1],
     },
   });
 });

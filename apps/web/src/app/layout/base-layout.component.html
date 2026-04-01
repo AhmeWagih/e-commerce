@@ -19,12 +19,22 @@
           class="text-slate-500 transition hover:text-slate-900"
           >Products</a
         >
-        <a
-          routerLink="/orders"
-          routerLinkActive="text-[#0f2f7f]"
-          class="text-slate-500 transition hover:text-slate-900"
-          >Orders</a
-        >
+        @if (auth.isAdmin()) {
+          <a
+            routerLink="/admin"
+            routerLinkActive="text-[#0f2f7f]"
+            class="text-slate-500 transition hover:text-slate-900"
+            >Admin</a
+          >
+        }
+        @if (auth.isLoggedIn()) {
+          <a
+            routerLink="/seller"
+            routerLinkActive="text-[#0f2f7f]"
+            class="text-slate-500 transition hover:text-slate-900"
+            >Seller</a
+          >
+        }
       </div>
 
       <div class="flex items-center gap-2 sm:gap-4">

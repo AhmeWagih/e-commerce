@@ -91,7 +91,12 @@ const sendEmailConfirmationUrl = async (user) => {
 
 // Signup
 exports.signUp = catchAsync(async (req, res, next) => {
-  const user = await User.create(req.body);
+  const body = { ...req.body };
+  delete body.accountStatus;
+  delete body.role;
+  body.accountStatus =
+    process.env.REQUIRE_USER_APPROVAL === 'true' ? 'pending' : 'active';
+  const user = await User.create(body);
 
   //create a cart for a new user
   await Cart.create({
@@ -121,7 +126,7 @@ exports.login = catchAsync(async (req, res, next) => {
   const customer = await User.findOne(query).select('+password');
 
   if (!customer) {
-    return next(new AppError('The email or passowrd is Wrong!', 401));
+    return next(new AppError('The email or password is Wrong!', 401));
   }
 
   //Check if password is correct
@@ -130,7 +135,7 @@ exports.login = catchAsync(async (req, res, next) => {
     customer.password
   );
   if (!passwordIsCorrect) {
-    return next(new AppError('May be email or passowrd is Wrong!', 401));
+    return next(new AppError('May be email or password is Wrong!', 401));
   }
   customer.password = undefined;
   sendToken(customer, 200, res);
@@ -172,6 +177,22 @@ exports.googleAuth = catchAsync(async (req, res, next) => {
 
   let user = await User.findOne({ email });
 
+  if (user) {
+    if (user.deletedAt) {
+      return next(new AppError('This account is no longer available.', 401));
+    }
+    if (user.accountStatus === 'restricted') {
+      return next(
+        new AppError('Your account has been restricted. Please contact support.', 403)
+      );
+    }
+    if (user.accountStatus === 'pending') {
+      return next(
+        new AppError('Your account is pending approval. Please contact support.', 403)
+      );
+    }
+  }
+
   if (!user) {
     const randomPassword = crypto.randomBytes(16).toString('hex');
 
@@ -183,7 +204,9 @@ exports.googleAuth = catchAsync(async (req, res, next) => {
       password: randomPassword,
       confirmPassword: randomPassword,
       emailConfirmed: true,
+      accountStatus: 'active',
     });
+    await Cart.create({ user: user._id });
   }
 
   user.password = undefined;

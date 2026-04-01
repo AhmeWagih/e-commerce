@@ -69,6 +69,8 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
   let filter = {};
   //if need to get products of Category
   if (req.params.categoryId) filter = { category: req.params.categoryId };
+  if (req.query.sellerId) filter.seller = req.query.sellerId;
+  if (req.query.myProducts === 'true' && req.user) filter.seller = req.user._id;
 
   // Filter, Sort, limitFileds, pagination of Products
   const features = new APIFeatures(Product.find(filter), req.query)
@@ -103,6 +105,7 @@ exports.getProduct = catchAsync(async (req, res, next) => {
 
 exports.createProduct = catchAsync(async (req, res, next) => {
   if (req.params.categoryId) req.body.category = req.params.categoryId;
+  if (!req.body.seller && req.user) req.body.seller = req.user._id;
   const newProduct = await Product.create(req.body);
 
   res.status(200).json({
@@ -114,6 +117,19 @@ exports.createProduct = catchAsync(async (req, res, next) => {
 });
 
 exports.updateProduct = catchAsync(async (req, res, next) => {
+  const product = await Product.findById(req.params.productId);
+  if (!product) return next(new AppError('Not found a product!', 400));
+  const productSellerId = product.seller && (product.seller._id || product.seller);
+
+  if (
+    req.user &&
+    req.user.role === 'seller' &&
+    productSellerId &&
+    productSellerId.toString() !== req.user._id.toString()
+  ) {
+    return next(new AppError('You can only update your own products', 403));
+  }
+
   const updatedProduct = await Product.findByIdAndUpdate(
     req.params.productId,
     req.body,
@@ -132,6 +148,19 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteProduct = catchAsync(async (req, res, next) => {
+  const product = await Product.findById(req.params.productId);
+  if (!product) return next(new AppError('Not found a product!', 400));
+  const productSellerId = product.seller && (product.seller._id || product.seller);
+
+  if (
+    req.user &&
+    req.user.role === 'seller' &&
+    productSellerId &&
+    productSellerId.toString() !== req.user._id.toString()
+  ) {
+    return next(new AppError('You can only delete your own products', 403));
+  }
+
   await Product.findByIdAndDelete(req.params.productId);
 
   res.status(204).json({

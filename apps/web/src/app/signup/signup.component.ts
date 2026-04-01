@@ -27,6 +27,54 @@ export class SignupComponent {
     password: '',
   };
 
+  private getApiErrorMessage(err: any, fallback: string): string {
+    const status = Number(err?.status ?? 0);
+
+    const validationErrors = err?.error?.errors;
+    if (validationErrors && typeof validationErrors === 'object') {
+      const firstValidationMessage = Object.values(validationErrors)
+        .map((item: any) => item?.message)
+        .find((message) => typeof message === 'string' && message.trim().length > 0);
+      if (firstValidationMessage) return String(firstValidationMessage).trim();
+    }
+
+    const raw = err?.error?.message ?? err?.error?.error;
+    if (!raw) return fallback;
+
+    const text = typeof raw === 'string' ? raw : String(raw);
+    const clean = text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(
+        (line) =>
+          line.length > 0 &&
+          !line.startsWith('at ') &&
+          !line.includes('node_modules') &&
+          !line.includes('internal/process/task_queues')
+      )
+      .join(' ')
+      .replace(/^Error:\s*/i, '')
+      .replace(/^ValidationError:\s*/i, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const normalized = clean
+      .replace(/^User validation failed:\s*/i, '')
+      .replace(/^Validation failed:\s*/i, '')
+      .replace(/^password:\s*/i, '')
+      .trim();
+
+    if (normalized && !/^Http failure response for\s+/i.test(normalized)) {
+      return normalized;
+    }
+
+    if (status === 400) return 'Please review your information and try again.';
+    if (status === 409) return 'An account with this email already exists.';
+    if (status >= 500) return 'Server error. Please try again in a moment.';
+
+    return fallback;
+  }
+
   submit() {
     this.loading.set(true);
     this.error.set(null);
@@ -48,7 +96,7 @@ export class SignupComponent {
       },
       error: (err: any) => {
         this.loading.set(false);
-        this.error.set(err.error?.message || 'Signup failed');
+        this.error.set(this.getApiErrorMessage(err, 'Signup failed. Please check your details.'));
       },
     });
   }

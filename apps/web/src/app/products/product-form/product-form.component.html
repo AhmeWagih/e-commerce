@@ -38,6 +38,21 @@
       }
 
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+          <label class="mb-1.5 block text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+            Category
+          </label>
+          <select
+            [(ngModel)]="form.categoryId"
+            name="categoryId"
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#0f2f7f]/40 focus:ring-4 focus:ring-[#0f2f7f]/10"
+          >
+            <option value="">— None —</option>
+            @for (c of categories(); track c._id) {
+              <option [value]="c._id">{{ c.name }}</option>
+            }
+          </select>
+        </div>
 
         <!-- ── Cover Image ── -->
         <div class="sm:col-span-2">

@@ -2,6 +2,7 @@ import { Component, OnInit, inject, input, output, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProductService } from '../../services/product.service';
+import { CategoryService, type Category } from '../../services/category.service';
 import type { Product, CreateProductResponse, UpdateProductResponse } from '../product.types';
 import { environment } from '../../../environments/environment';
 
@@ -13,6 +14,9 @@ import { environment } from '../../../environments/environment';
 })
 export class ProductFormComponent implements OnInit {
   private productService = inject(ProductService);
+  private categoryService = inject(CategoryService);
+
+  categories = signal<Category[]>([]);
 
   /** Pass an existing product to enable edit mode */
   product = input<Product | null>(null);
@@ -36,6 +40,7 @@ export class ProductFormComponent implements OnInit {
     discount: 0,
     description: '',
     specifications: '',
+    categoryId: '' as string,
   };
 
   // New file selected by the user
@@ -50,6 +55,11 @@ export class ProductFormComponent implements OnInit {
   readonly currencies = ['USD', 'EUR', 'GBP', 'EGP', 'SAR', 'AED'];
 
   ngOnInit() {
+    this.categoryService.getAll().subscribe({
+      next: (res) => this.categories.set(res.data.categories),
+      error: () => this.categories.set([]),
+    });
+
     const p = this.product();
     if (!p) return;
 
@@ -64,6 +74,7 @@ export class ProductFormComponent implements OnInit {
 
     if (p.imageCover) this.existingCoverUrl.set(this.getImageUrl(p.imageCover));
     if (p.images?.length) this.existingImageUrls.set(p.images.map((img) => this.getImageUrl(img)));
+    if (p.category?._id) this.form.categoryId = p.category._id;
   }
 
   getImageUrl(filename: string): string {
@@ -140,8 +151,8 @@ export class ProductFormComponent implements OnInit {
     fd.append('quantity', String(this.form.quantity));
     fd.append('discount', String(this.form.discount || 0));
     if (this.form.description.trim()) fd.append('description', this.form.description.trim());
-    if (this.form.specifications.trim())
-      fd.append('specifications', this.form.specifications.trim());
+    if (this.form.specifications.trim()) fd.append('specifications', this.form.specifications.trim());
+    if (this.form.categoryId.trim()) fd.append('category', this.form.categoryId.trim());
 
     const cover = this.imageCoverFile();
     if (cover) fd.append('imageCover', cover);

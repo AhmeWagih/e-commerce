@@ -33,6 +33,24 @@ const protect = catchAsync(async (req, res, next) => {
     return next(new AppError('The User is not exist!', 401));
   }
 
+  if (freshUser.deletedAt) {
+    return next(
+      new AppError('This account is no longer available. Please contact support.', 401)
+    );
+  }
+
+  if (freshUser.accountStatus === 'restricted') {
+    return next(
+      new AppError('Your account has been restricted. Please contact support.', 403)
+    );
+  }
+
+  if (freshUser.accountStatus === 'pending') {
+    return next(
+      new AppError('Your account is pending approval. You will be notified when it is active.', 403)
+    );
+  }
+
   if (freshUser.changedPasswordAfter(decoded.iat)) {
     return next(
       new AppError(

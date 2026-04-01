@@ -2,6 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { CartService } from '../services/cart.service';
+import { AuthService } from '../services/auth.service';
 import { ToastComponent } from './toast.component';
 
 @Component({
@@ -12,6 +13,7 @@ import { ToastComponent } from './toast.component';
 })
 export class BaseLayoutComponent implements OnInit {
   private cartService = inject(CartService);
+  auth = inject(AuthService);
   cartCount$ = this.cartService.totalCount$;
 
   ngOnInit(): void {

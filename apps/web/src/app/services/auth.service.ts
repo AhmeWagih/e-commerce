@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import type { AuthResponse } from './api.service';
 import { environment } from '../../environments/environment';
 
@@ -11,6 +12,7 @@ const CURRENT_USER_KEY = 'currentUser';
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private router = inject(Router);
 
   isLoggedIn = signal<boolean>(false);
   currentUser = signal<any>(null);
@@ -72,12 +74,27 @@ export class AuthService {
     this.isLoggedIn.set(true);
   }
 
+  updateCurrentUser(user: any) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+    this.currentUser.set(user);
+  }
+
   clearSession() {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(CURRENT_USER_KEY);
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     this.currentUser.set(null);
     this.isLoggedIn.set(false);
+  }
+
+  logout(redirectUrl = '/signin') {
+    this.clearSession();
+    if (typeof window === 'undefined') return;
+    void this.router.navigateByUrl(redirectUrl, { replaceUrl: true });
   }
 
   hasToken(): boolean {

@@ -1,0 +1,75 @@
+<div class="mx-auto max-w-4xl space-y-8">
+  <div>
+    <h2 class="text-2xl font-black tracking-tight text-slate-900">Homepage & banners</h2>
+    <p class="mt-1 text-sm text-slate-600">Hero copy and promotional tiles surfaced on the storefront home page.</p>
+  </div>
+
+  @if (error(); as err) {
+    <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">{{ err }}</div>
+  }
+  @if (message(); as ok) {
+    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">{{ ok }}</div>
+  }
+
+  @if (loading()) {
+    <p class="text-sm text-slate-500">Loading…</p>
+  } @else {
+    <div class="space-y-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 class="text-sm font-black uppercase tracking-[0.14em] text-slate-700">Hero</h3>
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <input [(ngModel)]="homepage.heroBadge" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm" placeholder="Badge" name="hb" />
+        <input [(ngModel)]="homepage.heroTitle" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm" placeholder="Title" name="ht" />
+        <textarea [(ngModel)]="homepage.heroSubtitle" rows="2" class="md:col-span-2 rounded-2xl border border-slate-200 px-3 py-2 text-sm" placeholder="Subtitle" name="hs"></textarea>
+        <input [(ngModel)]="homepage.heroImageUrl" class="md:col-span-2 rounded-2xl border border-slate-200 px-3 py-2 text-sm" placeholder="Hero image URL" name="hi" />
+      </div>
+
+      <h3 class="text-sm font-black uppercase tracking-[0.14em] text-slate-700">Collections intro</h3>
+      <div class="grid grid-cols-1 gap-3">
+        <input [(ngModel)]="homepage.collectionsHeading" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm" placeholder="Heading" name="ch" />
+        <textarea [(ngModel)]="homepage.collectionsSubheading" rows="2" class="rounded-2xl border border-slate-200 px-3 py-2 text-sm" placeholder="Subheading" name="cs"></textarea>
+      </div>
+
+      <div class="flex items-center justify-between gap-3">
+        <h3 class="text-sm font-black uppercase tracking-[0.14em] text-slate-700">Banners</h3>
+        <button type="button" (click)="addBanner()" class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-black uppercase">
+          Add tile
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        @for (b of banners(); track $index; let i = $index) {
+          <div class="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
+            <div class="mb-2 flex justify-end">
+              <button type="button" class="text-xs font-black uppercase text-rose-600" (click)="removeBanner(i)">Remove</button>
+            </div>
+            <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
+              <input [(ngModel)]="b.title" class="rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Title" [name]="'bt' + i" />
+              <input [(ngModel)]="b.subtitle" class="rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Subtitle" [name]="'bs' + i" />
+              <input [(ngModel)]="b.imageUrl" class="md:col-span-2 rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Image URL" [name]="'bi' + i" />
+              <input [(ngModel)]="b.linkUrl" class="md:col-span-2 rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Link URL" [name]="'bl' + i" />
+              <label class="flex items-center gap-2 text-xs font-semibold text-slate-600 md:col-span-2">
+                <input type="checkbox" [(ngModel)]="b.active" [name]="'ba' + i" />
+                Visible on storefront
+              </label>
+            </div>
+          </div>
+        } @empty {
+          <p class="text-sm text-slate-500">No banner tiles. Add one to enrich merchandising zones.</p>
+        }
+      </div>
+
+      <button
+        type="button"
+        (click)="save()"
+        [disabled]="saving()"
+        class="rounded-2xl bg-[#0f2f7f] px-6 py-3 text-sm font-black uppercase tracking-wide text-white disabled:opacity-60"
+      >
+        @if (saving()) {
+          Saving…
+        } @else {
+          Save changes
+        }
+      </button>
+    </div>
+  }
+</div>

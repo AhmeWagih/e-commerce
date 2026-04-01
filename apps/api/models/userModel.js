@@ -3,7 +3,8 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
   username: {
     type: String,
     required: [true, 'Username is required!'],
@@ -45,6 +46,60 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['customer', 'seller', 'admin'],
     default: 'customer',
+  },
+  sellerProfile: {
+    storeName: String,
+    businessName: String,
+    businessType: {
+      type: String,
+      enum: ['individual', 'company'],
+      default: 'individual',
+    },
+    taxId: String,
+    description: String,
+    logo: String,
+    supportEmail: String,
+    supportPhone: String,
+    warehouseAddress: String,
+    approvedAt: Date,
+  },
+  sellerWallet: {
+    pendingBalance: {
+      type: Number,
+      default: 0,
+    },
+    availableBalance: {
+      type: Number,
+      default: 0,
+    },
+    totalPaid: {
+      type: Number,
+      default: 0,
+    },
+    payoutHistory: [
+      {
+        amount: Number,
+        method: {
+          type: String,
+          enum: ['bank_transfer', 'paypal', 'manual'],
+        },
+        reference: String,
+        note: String,
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+  },
+  accountStatus: {
+    type: String,
+    enum: ['pending', 'active', 'restricted'],
+    default: 'active',
+  },
+  deletedAt: {
+    type: Date,
+    default: null,
   },
   active: {
     type: Boolean,
@@ -98,9 +153,19 @@ const userSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product',
           },
+          sellerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+          },
           quantity: {
             type: Number,
             default: 1,
+          },
+          unitPrice: Number,
+          sellerStatus: {
+            type: String,
+            enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+            default: 'pending',
           },
         },
       ],
@@ -108,11 +173,29 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0,
       },
+      subtotalBeforePromo: Number,
+      promoCode: String,
+      promoDiscount: {
+        type: Number,
+        default: 0,
+      },
+      shippingAddress: {
+        address: String,
+        city: String,
+        zipCode: String,
+      },
+      paymentMethod: {
+        type: String,
+        enum: ['credit', 'cod'],
+      },
       status: {
         type: String,
         enum: ['pending', 'paid', 'shipped', 'completed', 'cancelled'],
         default: 'pending',
       },
+      trackingNumber: String,
+      carrier: String,
+      shippingNotes: String,
       createdAt: {
         type: Date,
         default: Date.now,
@@ -141,7 +224,9 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetTokenExpires: Date,
-});
+  },
+  { timestamps: true }
+);
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
