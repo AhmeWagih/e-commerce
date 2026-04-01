@@ -12,6 +12,7 @@ const siteContentController = require("./controllers/siteContentController");
 const adminController = require("./controllers/adminController");
 const protect = require("./middlewares/protect");
 const restrictTo = require("./middlewares/restrictTo");
+const AppError = require("./utils/AppError");
 
 const app = express();
 app.use(express.json());
@@ -44,5 +45,19 @@ app.post(
   restrictTo("customer", "seller", "admin"),
   adminController.validatePromo
 );
+
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const status = err.status || 'error';
+
+  res.status(statusCode).json({
+    status,
+    message: err.message || 'Something went wrong',
+  });
+});
 
 module.exports = app;

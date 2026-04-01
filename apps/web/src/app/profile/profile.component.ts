@@ -124,7 +124,6 @@ export class ProfileComponent implements OnInit {
   }
 
   signOut() {
-    this.auth.clearSession();
-    this.router.navigateByUrl('/signin', { replaceUrl: true });
+    this.auth.logout('/signin');
   }
 }

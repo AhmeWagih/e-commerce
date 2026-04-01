@@ -126,7 +126,7 @@ exports.login = catchAsync(async (req, res, next) => {
   const customer = await User.findOne(query).select('+password');
 
   if (!customer) {
-    return next(new AppError('The email or passowrd is Wrong!', 401));
+    return next(new AppError('The email or password is Wrong!', 401));
   }
 
   //Check if password is correct
@@ -135,7 +135,7 @@ exports.login = catchAsync(async (req, res, next) => {
     customer.password
   );
   if (!passwordIsCorrect) {
-    return next(new AppError('May be email or passowrd is Wrong!', 401));
+    return next(new AppError('May be email or password is Wrong!', 401));
   }
   customer.password = undefined;
   sendToken(customer, 200, res);
