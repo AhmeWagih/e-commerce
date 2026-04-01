@@ -27,7 +27,9 @@ export class ProductFormComponent implements OnInit {
   loading = signal(false);
   error = signal<string | null>(null);
 
-  get isEditMode() { return !!this.product(); }
+  get isEditMode() {
+    return !!this.product();
+  }
 
   form = {
     title: '',
@@ -43,12 +45,12 @@ export class ProductFormComponent implements OnInit {
 
   // New file selected by the user
   imageCoverFile = signal<File | null>(null);
-  imageCoverPreview = signal<string | null>(null);   // data-URL of new file
-  existingCoverUrl = signal<string | null>(null);    // URL already stored in DB
+  imageCoverPreview = signal<string | null>(null); // data-URL of new file
+  existingCoverUrl = signal<string | null>(null); // URL already stored in DB
 
   imageFiles = signal<File[]>([]);
-  imagePreviews = signal<string[]>([]);              // data-URLs for new files
-  existingImageUrls = signal<string[]>([]);          // URLs already stored in DB
+  imagePreviews = signal<string[]>([]); // data-URLs for new files
+  existingImageUrls = signal<string[]>([]); // URLs already stored in DB
 
   readonly currencies = ['USD', 'EUR', 'GBP', 'EGP', 'SAR', 'AED'];
 
@@ -106,7 +108,10 @@ export class ProductFormComponent implements OnInit {
     const merged = [...this.imageFiles(), ...files].slice(0, 7 - totalExisting);
     this.imageFiles.set(merged);
 
-    if (merged.length === 0) { this.imagePreviews.set([]); return; }
+    if (merged.length === 0) {
+      this.imagePreviews.set([]);
+      return;
+    }
     const previews: string[] = new Array(merged.length);
     let loaded = 0;
     merged.forEach((file, i) => {
@@ -154,7 +159,21 @@ export class ProductFormComponent implements OnInit {
     this.imageFiles().forEach((file) => fd.append('images', file));
 
     const p = this.product();
+    const obs$ = (
+      p ? this.productService.updateProduct(p._id, fd) : this.productService.createProduct(fd)
+    ) as any;
 
+    obs$.subscribe({
+      next: (res: any) => {
+        this.loading.set(false);
+        const saved = p ? res.data.updatedProduct : res.data.newProduct;
+        this.saved.emit(saved);
+      },
+      error: (err: any) => {
+        this.loading.set(false);
+        this.error.set(err.error?.message || `Failed to ${p ? 'update' : 'create'} product.`);
+      }})
+      
     const onError = (err: HttpErrorResponse, action: 'update' | 'create') => {
       this.loading.set(false);
       this.error.set(err.error?.message || `Failed to ${action} product.`);

@@ -1,10 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, firstValueFrom } from 'rxjs';
 import { CartService } from '../services/cart.service';
 import { OrderService } from '../services/order.service';
+import { NotificationService } from '../services/notification.service';
 import type { HydratedCart } from '../cart/cart.types';
 
 type StepKey = 1 | 2 | 3;
@@ -20,10 +22,13 @@ export class CheckoutComponent implements OnInit {
   private cartService = inject(CartService);
   private orderService = inject(OrderService);
   private router = inject(Router);
+  private notifications = inject(NotificationService);
+  private platformId = inject(PLATFORM_ID);
 
   step = signal<StepKey>(1);
   isLoading = signal(false);
   placingOrder = signal(false);
+  orderError = signal<string | null>(null);
 
   cart = signal<HydratedCart | null>(null);
   totals$ = this.cartService.totals$;
@@ -60,16 +65,11 @@ export class CheckoutComponent implements OnInit {
 
   selectPayment(method: 'credit' | 'cod') {
     this.paymentForm.controls.method.setValue(method);
-    if (method === 'credit') {
-      this.paymentForm.controls.cardNumber.addValidators([Validators.required, Validators.minLength(12)]);
-      this.paymentForm.controls.cardName.addValidators([Validators.required, Validators.minLength(2)]);
-      this.paymentForm.controls.expiry.addValidators([Validators.required]);
-      this.paymentForm.controls.cvv.addValidators([Validators.required, Validators.minLength(3)]);
-    } else {
-      this.paymentForm.controls.cardNumber.clearValidators();
-      this.paymentForm.controls.cardName.clearValidators();
-      this.paymentForm.controls.expiry.clearValidators();
-      this.paymentForm.controls.cvv.clearValidators();
+    this.paymentForm.controls.cardNumber.clearValidators();
+    this.paymentForm.controls.cardName.clearValidators();
+    this.paymentForm.controls.expiry.clearValidators();
+    this.paymentForm.controls.cvv.clearValidators();
+    if (method !== 'credit') {
       this.paymentForm.patchValue({ cardNumber: '', cardName: '', expiry: '', cvv: '' }, { emitEvent: false });
     }
     this.paymentForm.controls.cardNumber.updateValueAndValidity();
@@ -89,7 +89,7 @@ export class CheckoutComponent implements OnInit {
     if (s === 2) {
       this.paymentForm.markAllAsTouched();
       if (this.paymentForm.invalid) return;
-      this.step.set(3);
+      void this.placeOrder();
       return;
     }
   }
@@ -97,42 +97,12 @@ export class CheckoutComponent implements OnInit {
   back() {
     const s = this.step();
     if (s === 2) this.step.set(1);
-    if (s === 3) this.step.set(2);
   }
 
-  applyPromo() {
-    const cart = this.cart();
-    const code = this.promoInput().trim();
-    if (!cart?.items.length || !code) return;
-    const subtotal = cart.totalPrice ?? 0;
-    this.promoError.set(null);
-    this.promoLoading.set(true);
-    this.orderService.validatePromo(code, subtotal).subscribe({
-      next: (res) => {
-        this.promoLoading.set(false);
-        this.promoDiscount.set(res.data.discount);
-        this.promoAppliedCode.set(res.data.code);
-      },
-      error: (err) => {
-        this.promoLoading.set(false);
-        this.promoDiscount.set(0);
-        this.promoAppliedCode.set(null);
-        this.promoError.set(err.error?.message || 'Invalid promo code.');
-      },
-    });
-  }
-
-  clearPromo() {
-    this.promoDiscount.set(0);
-    this.promoAppliedCode.set(null);
-    this.promoError.set(null);
-    this.promoInput.set('');
-  }
-
-  placeOrder() {
+  async placeOrder(): Promise<void> {
     const cart = this.cart();
     if (!cart || cart.items.length === 0) {
-      this.router.navigateByUrl('/cart');
+      void this.router.navigateByUrl('/cart');
       return;
     }
 
@@ -142,34 +112,63 @@ export class CheckoutComponent implements OnInit {
 
     const subtotal = cart.totalPrice ?? 0;
     const shipping = cart.items.length > 0 ? 50 : 0;
-    const discount = this.promoDiscount();
-    const total = Math.max(0, subtotal - discount + shipping);
+    const total = subtotal + shipping;
+
+    const paymentMethod = this.paymentForm.controls.method.value === 'credit' ? 'credit' : 'cod';
 
     this.placingOrder.set(true);
-    this.orderService
-      .createOrder({
-        items: cart.items.map((it) => ({
-          productId: it.product,
-          quantity: it.quantity,
-          unitPrice: it.priceAfterDiscount,
-        })),
-        totalAmount: total,
-        shippingFee: shipping,
-        promoCode: this.promoAppliedCode() || undefined,
-        shippingAddress: {
-          address: this.shippingForm.controls.address.value!,
-          city: this.shippingForm.controls.city.value!,
-          zipCode: this.shippingForm.controls.zipCode.value!,
-        },
-        paymentMethod: this.paymentForm.controls.method.value === 'credit' ? 'credit' : 'cod',
-      })
-      .pipe(finalize(() => this.placingOrder.set(false)))
-      .subscribe({
-        next: () => {
-          this.cartService.clearLocalCart();
-          this.router.navigateByUrl('/profile');
-        },
-      });
+    this.orderError.set(null);
+
+    try {
+      const result = await firstValueFrom(
+        this.orderService.createOrder({
+          items: cart.items.map((it) => ({
+            productId: it.product,
+            quantity: it.quantity,
+            unitPrice: it.priceAfterDiscount,
+          })),
+          totalAmount: total,
+          shippingAddress: {
+            address: this.shippingForm.controls.address.value!,
+            city: this.shippingForm.controls.city.value!,
+            zipCode: this.shippingForm.controls.zipCode.value!,
+          },
+          paymentMethod,
+        })
+      );
+
+      const sessionUrl = result.sessionUrl?.trim();
+      if (sessionUrl) {
+        if (isPlatformBrowser(this.platformId)) {
+          window.location.href = sessionUrl;
+        }
+        return;
+      }
+
+      if (paymentMethod === 'credit') {
+        const msg = 'No payment session URL was returned.';
+        this.orderError.set(msg);
+        this.notifications.error(msg);
+        return;
+      }
+
+      this.cartService.clearLocalCart();
+      this.notifications.success('Order placed successfully.');
+      await this.router.navigateByUrl('/orders');
+    } catch (err: unknown) {
+      let msg = 'Could not place order.';
+      if (err instanceof HttpErrorResponse) {
+        const e = err.error;
+        if (e && typeof e === 'object' && 'message' in e) {
+          msg = String((e as { message?: string }).message ?? msg);
+        } else if (typeof err.error === 'string' && err.error.length) {
+          msg = err.error;
+        }
+      }
+      this.orderError.set(msg);
+      this.notifications.error(msg);
+    } finally {
+      this.placingOrder.set(false);
+    }
   }
 }
-

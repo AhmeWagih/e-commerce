@@ -9,6 +9,7 @@ import { ProductsComponent } from './products/products.component';
 import { ProductDetailComponent } from './products/product-detail/product-detail.component';
 import { CartComponent } from './cart/cart.component';
 import { CheckoutComponent } from './checkout/checkout.component';
+import { OrdersPageComponent } from './orders/orders.page';
 import { nonEmptyCartGuard } from './guards/non-empty-cart.guard';
 import { adminGuard } from './guards/admin.guard';
 import { AdminLayoutComponent } from './admin/admin-layout.component';
@@ -62,6 +63,10 @@ export const routes: Routes = [
       {
         path: 'profile',
         component: ProfileComponent,
+      },
+      {
+        path: 'orders',
+        component: OrdersPageComponent,
       },
       {
         path: 'products',

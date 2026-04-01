@@ -75,6 +75,12 @@
     </div>
   }
 
+  @if (orderError(); as oe) {
+    <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3">
+      <p class="text-sm font-semibold text-rose-800">{{ oe }}</p>
+    </div>
+  }
+
   <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
     <div class="lg:col-span-2">
       @if (step() === 1) {
@@ -262,29 +268,19 @@
           Back
         </button>
 
-        @if (step() < 3) {
-          <button
-            type="button"
-            (click)="next()"
-            class="inline-flex items-center justify-center rounded-2xl bg-[#0f2f7f] px-5 py-3 text-sm font-black tracking-wide text-white shadow-lg shadow-[#0f2f7f]/20 transition hover:bg-[#0b2566]"
-          >
+        <button
+          type="button"
+          (click)="next()"
+          [disabled]="placingOrder()"
+          class="inline-flex items-center justify-center gap-3 rounded-2xl bg-[#0f2f7f] px-5 py-3 text-sm font-black tracking-wide text-white shadow-lg shadow-[#0f2f7f]/20 transition hover:bg-[#0b2566] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          @if (placingOrder()) {
+            <span class="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+            Processing…
+          } @else {
             Continue
-          </button>
-        } @else {
-          <button
-            type="button"
-            (click)="placeOrder()"
-            [disabled]="placingOrder()"
-            class="inline-flex items-center justify-center gap-3 rounded-2xl bg-[#0f2f7f] px-5 py-3 text-sm font-black tracking-wide text-white shadow-lg shadow-[#0f2f7f]/20 transition hover:bg-[#0b2566] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            @if (placingOrder()) {
-              <span class="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-              Placing…
-            } @else {
-              Place Order
-            }
-          </button>
-        }
+          }
+        </button>
       </div>
     </div>
 
