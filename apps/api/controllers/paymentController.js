@@ -40,7 +40,7 @@ exports.getCheckoutSession = async (req, order) => {
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      success_url: `${req.protocol}://${req.get('host')}/payment/success`,
+      success_url: `${req.protocol}://localhost:4200/orders`,
       cancel_url: `${req.protocol}://${req.get('host')}/payment/failed`,
       customer_email: req.user.email,
       client_reference_id: order.cart._id.toString(),
@@ -53,7 +53,7 @@ exports.getCheckoutSession = async (req, order) => {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 500, currency: 'usd' },
+            fixed_amount: { amount: 50, currency: 'usd' },
             display_name: 'Standard shipping',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 5 },
@@ -121,8 +121,8 @@ const createOrderCheckout = async (session) => {
   await cart.save();
 
   //Send Email for user
-  const user = await User.findById(cart.user);
-  await new Email(user, 0, order).sendOrderdetails();
+  // const user = await User.findById(cart.user);
+  // await new Email(user, 0, order).sendOrderdetails();
 };
 
 exports.webhookCheckout = async (req, res) => {

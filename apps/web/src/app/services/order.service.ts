@@ -8,31 +8,11 @@ import {
   normalizeOrder,
   type Order,
 } from '../orders/order.types';
+import type { CreateOrderRequest, CreateOrderResult } from '../interfaces/order.interface';
 import { ProductService } from './product.service';
 import type { ProductResponse } from '../products/product.types';
 
-export interface CreateOrderItem {
-  productId: string;
-  quantity: number;
-  unitPrice?: number;
-}
-
-export interface CreateOrderRequest {
-  items: CreateOrderItem[];
-  totalAmount: number;
-  status?: string;
-  shippingAddress?: {
-    address: string;
-    city: string;
-    zipCode: string;
-  };
-  paymentMethod?: 'credit' | 'cod';
-}
-
-export interface CreateOrderResult {
-  sessionUrl?: string;
-  orders: Order[];
-}
+export type { CreateOrderItem, CreateOrderRequest, CreateOrderResult } from '../interfaces/order.interface';
 
 @Injectable({
   providedIn: 'root',
