@@ -1,0 +1,160 @@
+<div class="space-y-8 pb-10">
+  <div>
+    <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#0f2f7f]">Seller Portal</p>
+    <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Seller Management</h1>
+  </div>
+
+  @if (error()) {
+    <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+      {{ error() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="rounded-2xl border border-slate-100 bg-white px-5 py-8 text-sm text-slate-500">Loading seller data...</div>
+  } @else {
+    <section class="rounded-2xl border border-slate-100 bg-white p-5 sm:p-6">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-black text-slate-900">Seller Profile</h2>
+        @if (auth.currentUser()?.role !== 'seller') {
+          <button
+            (click)="becomeSeller()"
+            [disabled]="savingProfile()"
+            class="rounded-xl bg-[#0f2f7f] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-60"
+          >
+            Become Seller
+          </button>
+        }
+      </div>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <input [(ngModel)]="profileForm.storeName" placeholder="Store Name" class="h-10 rounded-xl border border-slate-200 px-3 text-sm" />
+        <input [(ngModel)]="profileForm.businessName" placeholder="Business Name" class="h-10 rounded-xl border border-slate-200 px-3 text-sm" />
+        <select [(ngModel)]="profileForm.businessType" class="h-10 rounded-xl border border-slate-200 px-3 text-sm">
+          <option value="individual">Individual</option>
+          <option value="company">Company</option>
+        </select>
+        <input [(ngModel)]="profileForm.taxId" placeholder="Tax ID" class="h-10 rounded-xl border border-slate-200 px-3 text-sm" />
+        <input [(ngModel)]="profileForm.supportEmail" placeholder="Support Email" class="h-10 rounded-xl border border-slate-200 px-3 text-sm" />
+        <input [(ngModel)]="profileForm.supportPhone" placeholder="Support Phone" class="h-10 rounded-xl border border-slate-200 px-3 text-sm" />
+        <input [(ngModel)]="profileForm.warehouseAddress" placeholder="Warehouse Address" class="h-10 rounded-xl border border-slate-200 px-3 text-sm sm:col-span-2" />
+        <textarea [(ngModel)]="profileForm.description" rows="3" placeholder="Store Description" class="rounded-xl border border-slate-200 px-3 py-2 text-sm sm:col-span-2"></textarea>
+      </div>
+      <div class="mt-4">
+        <button
+          (click)="saveProfile()"
+          [disabled]="savingProfile()"
+          class="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-60"
+        >
+          Save Profile
+        </button>
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-100 bg-white p-5 sm:p-6">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-black text-slate-900">Inventory</h2>
+        @if (auth.currentUser()?.role === 'seller' || auth.currentUser()?.role === 'admin') {
+          <button
+            (click)="showProductForm.set(true)"
+            class="rounded-xl bg-[#0f2f7f] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white"
+          >
+            Add to Inventory
+          </button>
+        }
+      </div>
+      <div class="space-y-2">
+        @for (p of inventory(); track p._id) {
+          <div class="flex items-center justify-between rounded-xl border border-slate-100 px-3 py-2">
+            <div>
+              <p class="text-sm font-bold text-slate-900">{{ p.title }}</p>
+              <p class="text-xs text-slate-500">{{ p.brand }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <input #qtyInput type="number" [value]="p.quantity" min="0" class="h-9 w-20 rounded-lg border border-slate-200 px-2 text-sm" />
+              <button
+                (click)="updateStock(p._id, qtyInput.value)"
+                class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold uppercase"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-100 bg-white p-5 sm:p-6">
+      <h2 class="mb-4 text-lg font-black text-slate-900">Seller Orders</h2>
+      <div class="space-y-3">
+        @for (order of sellerOrders(); track order.orderId) {
+          <div class="rounded-xl border border-slate-100 p-3">
+            <p class="text-sm font-semibold text-slate-800">
+              Order: {{ order.orderId }} · Customer: {{ order.customerName }}
+            </p>
+            <div class="mt-2 space-y-2">
+              @for (item of order.myItems; track item._id) {
+                <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                  <p class="text-sm text-slate-700">Qty {{ item.quantity }} × {{ item.unitPrice }}</p>
+                  <select
+                    [ngModel]="item.sellerStatus"
+                    (ngModelChange)="setItemStatus(order, item, $event)"
+                    [disabled]="updatingItemId() === item._id"
+                    class="h-8 rounded-md border border-slate-200 px-2 text-xs"
+                  >
+                    <option value="pending">pending</option>
+                    <option value="processing">processing</option>
+                    <option value="shipped">shipped</option>
+                    <option value="delivered">delivered</option>
+                    <option value="cancelled">cancelled</option>
+                  </select>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-100 bg-white p-5 sm:p-6">
+      <h2 class="mb-4 text-lg font-black text-slate-900">Earnings & Payouts</h2>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div class="rounded-xl bg-slate-50 p-3">
+          <p class="text-xs uppercase text-slate-500">Pending</p>
+          <p class="text-lg font-black">{{ wallet()?.pendingBalance || 0 }}</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 p-3">
+          <p class="text-xs uppercase text-slate-500">Available</p>
+          <p class="text-lg font-black">{{ wallet()?.availableBalance || 0 }}</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 p-3">
+          <p class="text-xs uppercase text-slate-500">Total Paid</p>
+          <p class="text-lg font-black">{{ wallet()?.totalPaid || 0 }}</p>
+        </div>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-4">
+        <input [(ngModel)]="payoutForm.amount" type="number" min="1" placeholder="Amount" class="h-10 rounded-xl border border-slate-200 px-3 text-sm" />
+        <select [(ngModel)]="payoutForm.method" class="h-10 rounded-xl border border-slate-200 px-3 text-sm">
+          <option value="manual">Manual</option>
+          <option value="bank_transfer">Bank Transfer</option>
+          <option value="paypal">PayPal</option>
+        </select>
+        <input [(ngModel)]="payoutForm.reference" placeholder="Reference" class="h-10 rounded-xl border border-slate-200 px-3 text-sm" />
+        <button
+          (click)="submitPayout()"
+          [disabled]="requestingPayout()"
+          class="rounded-xl bg-[#0f2f7f] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-60"
+        >
+          Request Payout
+        </button>
+      </div>
+    </section>
+  }
+</div>
+
+@if (showProductForm()) {
+  <app-product-form
+    (saved)="onProductCreated($event)"
+    (cancelled)="showProductForm.set(false)"
+  />
+}
