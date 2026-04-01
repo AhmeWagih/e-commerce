@@ -13,7 +13,6 @@ const adminController = require("./controllers/adminController");
 const protect = require("./middlewares/protect");
 const restrictTo = require("./middlewares/restrictTo");
 const AppError = require("./utils/AppError");
-const categoryRouter = require('./routers/categoryRoutes');
 const orderRouter = require('./routers/orderRoutes');
 const paymentRouter = require('./routers/paymentRoutes');
 
@@ -46,6 +45,8 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/products', productRouter);
 app.use('/api/v1/cart', cartRouter);
 app.use("/api/v1/categories", categoryRouter);
+app.use('/api/v1/orders', orderRouter);
+app.use('/api/v1/payments', paymentRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use('/api/v1/sellers', sellerRouter);
 
@@ -70,8 +71,6 @@ app.use((err, req, res, next) => {
     message: err.message || 'Something went wrong',
   });
 });
-app.use('/api/v1/categories', categoryRouter);
-app.use('/api/v1/orders', orderRouter);
-app.use('/api/v1/payments', paymentRouter);
+
 
 module.exports = app;
