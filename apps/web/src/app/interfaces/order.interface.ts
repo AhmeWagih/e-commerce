@@ -10,6 +10,8 @@ export interface CreateOrderRequest {
   items: CreateOrderItem[];
   totalAmount: number;
   status?: string;
+  promoCode?: string;
+  shippingFee?: number;
   shippingAddress?: {
     address: string;
     city: string;
