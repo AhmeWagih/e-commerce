@@ -17,6 +17,7 @@ import { AdminCategoriesComponent } from './admin/admin-categories.component';
 import { AdminOrdersComponent } from './admin/admin-orders.component';
 import { AdminPromosComponent } from './admin/admin-promos.component';
 import { AdminContentComponent } from './admin/admin-content.component';
+import { SellerManagementComponent } from './seller/seller-management.component';
 
 export const routes: Routes = [
   {
@@ -78,6 +79,10 @@ export const routes: Routes = [
         path: 'checkout',
         component: CheckoutComponent,
         canActivate: [nonEmptyCartGuard],
+      },
+      {
+        path: 'seller',
+        component: SellerManagementComponent,
       },
     ],
   },

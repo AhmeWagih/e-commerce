@@ -47,6 +47,11 @@ const productSchema = new mongoose.Schema({
     required: false,
     ref: 'Category',
   },
+  seller: {
+    type: mongoose.SchemaTypes.ObjectId,
+    ref: 'User',
+    required: [true, 'Seller is required'],
+  },
   specifications: {
     type: String,
   },
@@ -75,6 +80,10 @@ productSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'category',
     select: '_id name',
+  });
+  this.populate({
+    path: 'seller',
+    select: '_id name username email',
   });
   next();
 });

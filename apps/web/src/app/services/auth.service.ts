@@ -72,6 +72,12 @@ export class AuthService {
     this.isLoggedIn.set(true);
   }
 
+  updateCurrentUser(user: any) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+    this.currentUser.set(user);
+  }
+
   clearSession() {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(ACCESS_TOKEN_KEY);

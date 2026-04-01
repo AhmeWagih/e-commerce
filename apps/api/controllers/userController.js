@@ -234,8 +234,10 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     subtotal += unitPrice * qty;
     normalizedItems.push({
       productId: product._id,
+      sellerId: product.seller ? product.seller._id || product.seller : undefined,
       quantity: qty,
       unitPrice,
+      sellerStatus: 'pending',
     });
   }
 
@@ -279,6 +281,20 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   });
 
   await user.save();
+
+  const sellerRevenueMap = new Map();
+  normalizedItems.forEach((item) => {
+    if (!item.sellerId) return;
+    const key = item.sellerId.toString();
+    const amount = Number(item.unitPrice) * Number(item.quantity);
+    sellerRevenueMap.set(key, Number(sellerRevenueMap.get(key) || 0) + amount);
+  });
+
+  for (const [sellerId, amount] of sellerRevenueMap.entries()) {
+    await User.findByIdAndUpdate(sellerId, {
+      $inc: { 'sellerWallet.pendingBalance': amount },
+    });
+  }
 
   res.status(201).json({
     status: 'success',
