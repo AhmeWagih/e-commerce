@@ -112,7 +112,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   const userInfo = req.body;
 
   //can't Change Password
-  if (userInfo.password || userInfo.cofirmPassword || userInfo.role) {
+  if (userInfo.password || userInfo.confirmPassword || userInfo.role) {
     return next(
       new AppError("You can't Change Password or Role In this Endpoint!", 400)
     );

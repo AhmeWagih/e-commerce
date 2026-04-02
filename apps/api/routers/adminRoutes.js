@@ -14,7 +14,7 @@ router.delete('/users/:userId', adminController.softDeleteUser);
 router.patch('/users/:userId/restore', adminController.restoreUser);
 
 router.get('/orders', adminController.listOrders);
-router.patch('/orders/:userId/:orderId', adminController.updateOrder);
+router.patch('/orders/:orderId', adminController.updateOrder);
 
 router.get('/promos', adminController.listPromos);
 router.post('/promos', adminController.createPromo);

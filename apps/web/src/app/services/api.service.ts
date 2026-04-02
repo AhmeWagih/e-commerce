@@ -28,5 +28,8 @@ export class ApiService {
   me(): Observable<any> {
     return this.http.get<any>(`${environment.apiBaseUrl}/users/me`);
   }
-}
 
+  updateMe(payload: any): Observable<any> {
+    return this.http.patch<any>(`${environment.apiBaseUrl}/users/updateMe`, payload);
+  }
+}

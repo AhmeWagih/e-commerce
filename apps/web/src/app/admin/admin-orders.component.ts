@@ -75,7 +75,7 @@ export class AdminOrdersComponent implements OnInit {
     if (!v) return;
     this.savingKey.set(k);
     this.admin
-      .updateOrder(row.userId, String(row.order._id), {
+      .updateOrder(String(row.order._id), {
         status: v.status,
         trackingNumber: v.trackingNumber || undefined,
         carrier: v.carrier || undefined,

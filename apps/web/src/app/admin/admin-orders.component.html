@@ -11,10 +11,10 @@
     >
       <option value="">All statuses</option>
       <option value="pending">Pending</option>
-      <option value="paid">Paid</option>
+      <option value="processing">Processing</option>
       <option value="shipped">Shipped</option>
-      <option value="completed">Completed</option>
-      <option value="cancelled">Cancelled</option>
+      <option value="delivered">Delivered</option>
+      <option value="canceled">Canceled</option>
     </select>
   </div>
 
@@ -58,10 +58,10 @@
                   (ngModelChange)="patch(row, 'status', $event)"
                 >
                   <option value="pending">pending</option>
-                  <option value="paid">paid</option>
+                  <option value="processing">processing</option>
                   <option value="shipped">shipped</option>
-                  <option value="completed">completed</option>
-                  <option value="cancelled">cancelled</option>
+                  <option value="delivered">delivered</option>
+                  <option value="canceled">canceled</option>
                 </select>
               </div>
               <div>

@@ -12,6 +12,7 @@ export type AccountUser = {
   name: string;
   email: string;
   phone?: string;
+  address?: string;
   role: AppRole;
   verified: boolean;
   createdAt?: string;

@@ -81,11 +81,10 @@ export class AdminService {
   }
 
   updateOrder(
-    userId: string,
     orderId: string,
     body: { status?: string; trackingNumber?: string; carrier?: string; shippingNotes?: string }
   ): Observable<unknown> {
-    return this.http.patch(`${this.base}/orders/${userId}/${orderId}`, body);
+    return this.http.patch(`${this.base}/orders/${orderId}`, body);
   }
 
   listPromos(): Observable<{ data: { promos: PromoCode[] } }> {

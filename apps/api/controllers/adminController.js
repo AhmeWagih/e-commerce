@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
+const Order = require('../models/orderModel');
 const PromoCode = require('../models/promoCodeModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
@@ -94,51 +95,56 @@ exports.restoreUser = catchAsync(async (req, res, next) => {
 });
 
 exports.listOrders = catchAsync(async (req, res) => {
-  const match = { deletedAt: null, 'orders.0': { $exists: true } };
-  const pipeline = [{ $match: match }, { $unwind: '$orders' }];
+  const match = { status: { $exists: true } };
   if (req.query.status) {
-    pipeline.push({ $match: { 'orders.status': req.query.status } });
+    match.status = req.query.status;
   }
-  pipeline.push(
-    {
-      $project: {
-        _id: 0,
-        userId: '$_id',
-        userEmail: '$email',
-        userName: '$name',
-        order: '$orders',
-      },
-    },
-    { $sort: { 'order.createdAt': -1 } }
-  );
 
-  const orders = await User.aggregate(pipeline);
+  const orders = await Order.find(match)
+    .populate('user', '_id name email')
+    .sort('-createdAt')
+    .lean();
+
+  const result = orders.map((order) => ({
+    userId: order.user?._id,
+    userName: order.user?.name || 'Unknown',
+    userEmail: order.user?.email || 'Unknown',
+    order: {
+      _id: order._id,
+      status: order.status,
+      totalAmount: order.shippingCost || 0,
+      trackingNumber: order.trackingNumber || '',
+      carrier: order.carrier || '',
+      shippingNotes: order.shippingNotes || '',
+      createdAt: order.createdAt,
+      paymentStatus: order.paymentStatus,
+      shippingMethod: order.shippingMethod,
+      paymentMethod: order.paymentMethod,
+    },
+  }));
 
   res.status(200).json({
     status: 'success',
-    results: orders.length,
-    data: { orders },
+    results: result.length,
+    data: { orders: result },
   });
 });
 
 exports.updateOrder = catchAsync(async (req, res, next) => {
-  const { userId, orderId } = req.params;
+  const { orderId } = req.params;
   const { status, trackingNumber, carrier, shippingNotes } = req.body;
 
-  if (!mongoose.isValidObjectId(userId) || !mongoose.isValidObjectId(orderId)) {
-    return next(new AppError('Invalid ids', 400));
+  if (!mongoose.isValidObjectId(orderId)) {
+    return next(new AppError('Invalid order ID', 400));
   }
 
-  const user = await User.findById(userId);
-  if (!user || user.deletedAt) return next(new AppError('User not found', 404));
-
-  const order = user.orders.id(orderId);
+  const order = await Order.findById(orderId);
   if (!order) return next(new AppError('Order not found', 404));
 
   if (status) {
-    const allowed = ['pending', 'paid', 'shipped', 'completed', 'cancelled'];
+    const allowed = ['pending', 'processing', 'shipped', 'delivered', 'canceled'];
     if (!allowed.includes(status)) {
-      return next(new AppError('Invalid order status', 400));
+      return next(new AppError(`Invalid status. Must be one of: ${allowed.join(', ')}`, 400));
     }
     order.status = status;
   }
@@ -146,11 +152,11 @@ exports.updateOrder = catchAsync(async (req, res, next) => {
   if (carrier !== undefined) order.carrier = carrier;
   if (shippingNotes !== undefined) order.shippingNotes = shippingNotes;
 
-  await user.save({ validateBeforeSave: false });
+  await order.save();
 
   res.status(200).json({
     status: 'success',
-    data: { order, userId: user._id },
+    data: { order },
   });
 });
 
