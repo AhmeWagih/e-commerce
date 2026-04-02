@@ -3,6 +3,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
+import { NotificationService } from '../../services/notification.service';
+import { WishlistService } from '../../services/wishlist.service';
 import { ProductFormComponent } from '../product-form/product-form.component';
 import type { Product } from '../product.types';
 import { environment } from '../../../environments/environment';
@@ -18,6 +20,8 @@ export class ProductDetailComponent implements OnInit {
   private router = inject(Router);
   private productService = inject(ProductService);
   private cartService = inject(CartService);
+  private wishlist = inject(WishlistService);
+  private notifications = inject(NotificationService);
   auth = inject(AuthService);
 
   product = signal<Product | null>(null);
@@ -25,6 +29,8 @@ export class ProductDetailComponent implements OnInit {
   error = signal<string | null>(null);
   selectedImage = signal<string | null>(null);
   addingToCart = signal(false);
+  wishlistBusy = signal(false);
+  inWishlist = signal(false);
 
   deleting = signal(false);
   confirmDelete = signal(false);
@@ -43,12 +49,19 @@ export class ProductDetailComponent implements OnInit {
         const cover = res.data.product.imageCover;
         if (cover) this.selectedImage.set(this.getImageUrl(cover));
         this.loading.set(false);
+        this.syncWishlistState();
       },
       error: () => {
         this.error.set('Product not found or failed to load.');
         this.loading.set(false);
       },
     });
+
+    if (this.auth.hasToken()) {
+      this.wishlist.ensureLoaded().subscribe({
+        next: () => this.syncWishlistState(),
+      });
+    }
   }
 
   onProductUpdated(updated: Product) {
@@ -112,6 +125,45 @@ export class ProductDetailComponent implements OnInit {
         this.addingToCart.set(false);
       },
     });
+  }
+
+  toggleWishlist() {
+    const p = this.product();
+    if (!p?._id) return;
+
+    if (!this.auth.hasToken()) {
+      this.notifications.show('Please sign in to use your wishlist.');
+      this.router.navigateByUrl('/signin');
+      return;
+    }
+
+    this.wishlistBusy.set(true);
+    const req = this.inWishlist() ? this.wishlist.remove(p._id) : this.wishlist.add(p._id);
+    req.subscribe({
+      next: () => {
+        const nowInWishlist = this.wishlist.contains(p._id);
+        this.inWishlist.set(nowInWishlist);
+        this.wishlistBusy.set(false);
+        if (nowInWishlist) {
+          this.notifications.success('Added to wishlist.');
+        } else {
+          this.notifications.success('Removed from wishlist.');
+        }
+      },
+      error: () => {
+        this.wishlistBusy.set(false);
+        this.notifications.error('Could not update wishlist.');
+      },
+    });
+  }
+
+  private syncWishlistState() {
+    const id = this.product()?._id;
+    if (!id) {
+      this.inWishlist.set(false);
+      return;
+    }
+    this.inWishlist.set(this.wishlist.contains(id));
   }
 
   get allImages(): string[] {

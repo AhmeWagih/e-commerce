@@ -222,10 +222,19 @@
             @if (addingToCart()) { Adding… } @else { Add to Cart }
           </button>
           <button
+            type="button"
+            (click)="toggleWishlist()"
+            [disabled]="wishlistBusy()"
             class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-6 py-3.5 text-sm font-bold uppercase tracking-[0.1em] text-slate-700 transition hover:border-[#0f2f7f] hover:text-[#0f2f7f]"
           >
-            <span class="material-symbols-outlined text-[18px]">favorite_border</span>
-            Wishlist
+            <span class="material-symbols-outlined text-[18px]">{{ inWishlist() ? 'favorite' : 'favorite_border' }}</span>
+            @if (wishlistBusy()) {
+              Updating...
+            } @else if (inWishlist()) {
+              Wishlisted
+            } @else {
+              Wishlist
+            }
           </button>
         </div>
       </div>
